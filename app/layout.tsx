@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { CartProvider } from '@/lib/cart';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { BottomNav } from '@/components/BottomNav';
 import { WhatsAppFloat } from '@/components/WhatsAppFloat';
 import './globals.css';
 
@@ -17,8 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-white text-neutral-900 antialiased">
         <CartProvider>
           <Header />
-          <main className="mx-auto max-w-7xl px-4">{children}</main>
+          <main className="mx-auto max-w-7xl px-4 pb-24">{children}</main>
           <Footer />
+          <BottomNav />
           <WhatsAppFloat />
         </CartProvider>
       </body>

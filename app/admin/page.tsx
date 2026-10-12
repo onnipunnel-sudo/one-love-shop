@@ -10,6 +10,7 @@ import {
   Order,
   PaymentMethod,
   Product,
+  Promo,
   hashPassword,
   loadDb,
   money,
@@ -18,7 +19,7 @@ import {
   uid,
 } from '@/lib/store';
 
-const TABS = ['Products', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
+const TABS = ['Products', 'Promos', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
 
 const inputCls =
   'h-10 w-full rounded-md bg-white px-3 text-sm text-neutral-900 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold';
@@ -120,6 +121,7 @@ export default function AdminPage() {
       </div>
 
       {tab === 'Products' && <ProductsTab db={db} persist={persist} />}
+      {tab === 'Promos' && <PromosTab db={db} persist={persist} />}
       {tab === 'Bulk Import' && <BulkTab db={db} persist={persist} />}
       {tab === 'Payments' && <PaymentsTab db={db} persist={persist} />}
       {tab === 'Coupons' && <CouponsTab db={db} persist={persist} />}
@@ -138,11 +140,36 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
   const set = (k: keyof Product, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
 
-  // Image: paste URL or upload a file (stored as dataURL in localStorage)
-  const onFile = (file: File | undefined) => {
+  // Gallery-first uploads: photo is downscaled so it fits browser storage;
+  // video is stored as-is (keep clips short, max ~10MB).
+  const onImageFile = (file: File | undefined) => {
     if (!file) return;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const max = 1200;
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.width * scale));
+      c.height = Math.max(1, Math.round(img.height * scale));
+      c.getContext('2d')?.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      set('image', c.toDataURL('image/jpeg', 0.82));
+      setMsg('Photo added from gallery.');
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); setMsg('Could not read that photo.'); };
+    img.src = url;
+  };
+
+  const onVideoFile = (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setMsg('Video too large (max 10MB) — use a shorter clip.');
+      return;
+    }
     const r = new FileReader();
-    r.onload = () => set('image', String(r.result));
+    r.onload = () => { set('video', String(r.result)); setMsg('Video added from gallery.'); };
+    r.onerror = () => setMsg('Could not read that video.');
     r.readAsDataURL(file);
   };
 
@@ -154,12 +181,16 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
     let products: Product[];
     if (editing) {
       products = db.products.map((p) => (p.id === editing.id ? { ...form, id: editing.id } : p));
-      setMsg('Product updated.');
     } else {
       products = [...db.products, { ...form, id: uid('p'), oldPrice: form.oldPrice || undefined }];
-      setMsg('Product added.');
     }
-    persist({ ...db, products });
+    try {
+      persist({ ...db, products });
+    } catch {
+      setMsg('Storage full — video/photo too large. Use a smaller file or a link.');
+      return;
+    }
+    setMsg(editing ? 'Product updated.' : 'Product added.');
     setForm(emptyProduct);
     setEditing(null);
   };
@@ -180,14 +211,28 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           <input value={form.category} onChange={(e) => set('category', e.target.value)} placeholder="Category (Gifts, Electronics, Fashion, Home)" className={inputCls} />
           <input type="number" value={form.price || ''} onChange={(e) => set('price', Number(e.target.value))} placeholder="Price (Rs.) *" className={inputCls} />
           <input type="number" value={form.oldPrice || ''} onChange={(e) => set('oldPrice', Number(e.target.value) || undefined)} placeholder="Old price (Rs., optional)" className={inputCls} />
-          <input value={form.image} onChange={(e) => set('image', e.target.value)} placeholder="Image URL * (or upload below)" className={inputCls} />
-          <input value={form.video || ''} onChange={(e) => set('video', e.target.value)} placeholder="Product video URL (mp4, optional)" className={inputCls} />
+          <div className="sm:col-span-2">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">Photo & video — from gallery</div>
+            <div className="flex flex-wrap gap-2">
+              <label className={`${btnGhost} cursor-pointer`}>
+                📷 Add photo from gallery
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => { onImageFile(e.target.files?.[0]); e.target.value = ''; }} />
+              </label>
+              <label className={`${btnGhost} cursor-pointer`}>
+                🎥 Add video from gallery
+                <input type="file" accept="video/*" className="hidden" onChange={(e) => { onVideoFile(e.target.files?.[0]); e.target.value = ''; }} />
+              </label>
+              {form.video && (
+                <button type="button" onClick={() => set('video', '')} className={`${btnGhost} hover:!text-red-400`}>✕ Remove video</button>
+              )}
+            </div>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <input value={form.image} onChange={(e) => set('image', e.target.value)} placeholder="…or paste image URL" className={inputCls} />
+              <input value={form.video || ''} onChange={(e) => set('video', e.target.value)} placeholder="…or paste video URL (mp4)" className={inputCls} />
+            </div>
+          </div>
           <input type="number" value={form.stock} onChange={(e) => set('stock', Number(e.target.value))} placeholder="Stock" className={inputCls} />
           <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Description" rows={2} className="w-full rounded-md bg-white px-3 py-2.5 text-sm outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
-          <div>
-            <div className="mb-1 text-xs text-neutral-500">Or upload an image (saved in browser storage)</div>
-            <input type="file" accept="image/*" onChange={(e) => onFile(e.target.files?.[0])} className="text-xs text-neutral-600" />
-          </div>
           <div className="flex items-center gap-6 text-sm text-neutral-700">
             <label className="flex items-center gap-2">
               <input type="checkbox" checked={!!form.featured} onChange={(e) => set('featured', e.target.checked)} className="accent-[#D4AF37]" /> Featured
@@ -197,14 +242,17 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             </label>
           </div>
         </div>
-        {form.image && <img src={form.image} alt="preview" className="mt-3 h-20 w-20 rounded object-cover ring-1 ring-gold/40" />}
+        <div className="mt-3 flex gap-3">
+          {form.image && <img src={form.image} alt="preview" className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" />}
+          {form.video && <video src={form.video} className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" muted playsInline />}
+        </div>
         <div className="mt-4 flex gap-2">
           <button onClick={save} className={btnGold}>{editing ? 'Save changes' : 'Add product'}</button>
           {editing && (
             <button onClick={() => { setEditing(null); setForm(emptyProduct); }} className={btnGhost}>Cancel</button>
           )}
         </div>
-        {msg && <div className="mt-2 text-xs text-green-400">{msg}</div>}
+        {msg && <div className="mt-2 text-xs font-medium text-neutral-700">{msg}</div>}
       </div>
 
       <div className="overflow-x-auto rounded-lg bg-white ring-1 ring-neutral-200">
@@ -233,9 +281,166 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   );
 }
 
-/* ───────────────────────── Bulk import ───────────────────────── */
+/* ───────────────────────── Promos ───────────────────────── */
 
-function parseBulk(text: string): Omit<Product, 'id' | 'rating' | 'description'>[] {
+const emptyPromo: Promo = {
+  id: '',
+  title: '',
+  image: '',
+  video: '',
+  price: 0,
+  oldPrice: undefined,
+  offer: '',
+  description: '',
+  date: '',
+};
+
+function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
+  const [form, setForm] = useState<Promo>(emptyPromo);
+  const [editing, setEditing] = useState<Promo | null>(null);
+  const [msg, setMsg] = useState('');
+  const set = (k: keyof Promo, v: string | number | undefined) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  const onImageFile = (file: File | undefined) => {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const max = 1200;
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.width * scale));
+      c.height = Math.max(1, Math.round(img.height * scale));
+      c.getContext('2d')?.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      set('image', c.toDataURL('image/jpeg', 0.82));
+      setMsg('Photo added from gallery.');
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); setMsg('Could not read that photo.'); };
+    img.src = url;
+  };
+
+  const onVideoFile = (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setMsg('Video too large (max 10MB) — use a shorter clip.');
+      return;
+    }
+    const r = new FileReader();
+    r.onload = () => { set('video', String(r.result)); setMsg('Video added from gallery.'); };
+    r.onerror = () => setMsg('Could not read that video.');
+    r.readAsDataURL(file);
+  };
+
+  const save = () => {
+    if (!form.title.trim() || !form.price || !form.image) {
+      setMsg('Title, price and image are required.');
+      return;
+    }
+    const promo: Promo = {
+      ...form,
+      id: editing ? editing.id : uid('promo'),
+      date: editing ? editing.date : new Date().toISOString(),
+      oldPrice: form.oldPrice || undefined,
+      offer: form.offer?.trim() || undefined,
+      video: form.video?.trim() || undefined,
+    };
+    const promos = editing
+      ? db.promos.map((p) => (p.id === editing.id ? promo : p))
+      : [promo, ...db.promos];
+    try {
+      persist({ ...db, promos });
+    } catch {
+      setMsg('Storage full — video/photo too large. Use a smaller file or a link.');
+      return;
+    }
+    setMsg(editing ? 'Promo updated.' : 'Promo posted.');
+    setForm(emptyPromo);
+    setEditing(null);
+  };
+
+  const del = (id: string) => {
+    if (!confirm('Delete this promo?')) return;
+    persist({ ...db, promos: db.promos.filter((p) => p.id !== id) });
+  };
+
+  return (
+    <div>
+      <div className="mb-4 rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+        <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">
+          {editing ? 'Edit promo' : 'New promo post'}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input value={form.title} onChange={(e) => set('title', e.target.value)} placeholder="Promo title *" className={`${inputCls} sm:col-span-2`} />
+          <input type="number" value={form.price || ''} onChange={(e) => set('price', Number(e.target.value))} placeholder="Offer price (Rs.) *" className={inputCls} />
+          <input type="number" value={form.oldPrice || ''} onChange={(e) => set('oldPrice', Number(e.target.value) || undefined)} placeholder="Original price (Rs.)" className={inputCls} />
+          <input value={form.offer || ''} onChange={(e) => set('offer', e.target.value)} placeholder="Offer label (e.g. Festival Special −30%)" className={`${inputCls} sm:col-span-2`} />
+          <div className="sm:col-span-2">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">Photo & video — from gallery</div>
+            <div className="flex flex-wrap gap-2">
+              <label className={`${btnGhost} cursor-pointer`}>
+                📷 Photo from gallery
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => { onImageFile(e.target.files?.[0]); e.target.value = ''; }} />
+              </label>
+              <label className={`${btnGhost} cursor-pointer`}>
+                🎥 Video from gallery
+                <input type="file" accept="video/*" className="hidden" onChange={(e) => { onVideoFile(e.target.files?.[0]); e.target.value = ''; }} />
+              </label>
+              {form.video && (
+                <button type="button" onClick={() => set('video', '')} className={`${btnGhost} hover:!text-red-400`}>✕ Remove video</button>
+              )}
+            </div>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <input value={form.image} onChange={(e) => set('image', e.target.value)} placeholder="…or paste image URL" className={inputCls} />
+              <input value={form.video || ''} onChange={(e) => set('video', e.target.value)} placeholder="…or paste video URL (mp4)" className={inputCls} />
+            </div>
+          </div>
+          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Description — sell it here" rows={3} className="w-full rounded-md bg-white px-3 py-2.5 text-sm outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
+        </div>
+        <div className="mt-3 flex gap-3">
+          {form.image && <img src={form.image} alt="preview" className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" />}
+          {form.video && <video src={form.video} className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" muted playsInline />}
+        </div>
+        <div className="mt-4 flex gap-2">
+          <button onClick={save} className={btnGold}>{editing ? 'Save changes' : 'Post promo'}</button>
+          {editing && (
+            <button onClick={() => { setEditing(null); setForm(emptyPromo); }} className={btnGhost}>Cancel</button>
+          )}
+        </div>
+        {msg && <div className="mt-2 text-xs font-medium text-neutral-700">{msg}</div>}
+      </div>
+
+      <div className="overflow-x-auto rounded-lg bg-white ring-1 ring-neutral-200">
+        <table className="w-full min-w-[720px]">
+          <thead><tr className="border-b border-neutral-200"><th className={thCls}>Media</th><th className={thCls}>Title</th><th className={thCls}>Price</th><th className={thCls}>Offer</th><th className={thCls}>Actions</th></tr></thead>
+          <tbody>
+            {db.promos.map((p) => (
+              <tr key={p.id} className="border-b border-neutral-200">
+                <td className={tdCls}>
+                  {p.video
+                    ? <video src={p.video} className="h-10 w-10 rounded object-cover" muted playsInline />
+                    : <img src={p.image} alt="" className="h-10 w-10 rounded object-cover" />}
+                </td>
+                <td className={tdCls}>{p.title}<div className="text-xs text-neutral-500">{new Date(p.date).toLocaleDateString('en-LK')}</div></td>
+                <td className={tdCls}>{money(p.price)}{p.oldPrice ? <span className="text-xs text-neutral-500 line-through"> {money(p.oldPrice)}</span> : null}</td>
+                <td className={tdCls}>{p.offer || '—'}</td>
+                <td className={tdCls}>
+                  <div className="flex gap-2">
+                    <button onClick={() => { setEditing(p); setForm({ ...p }); window.scrollTo(0, 0); }} className={btnGhost}>Edit</button>
+                    <button onClick={() => del(p.id)} className={`${btnGhost} hover:!text-red-400`}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ───────────────────────── Bulk import ───────────────────────── */function parseBulk(text: string): Omit<Product, 'id' | 'rating' | 'description'>[] {
   const out: Omit<Product, 'id' | 'rating' | 'description'>[] = [];
   for (const rawLine of text.split('\n')) {
     const line = rawLine.trim();

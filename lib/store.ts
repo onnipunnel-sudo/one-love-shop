@@ -56,6 +56,18 @@ export interface Order {
   date: string; // ISO
 }
 
+export interface Promo {
+  id: string;
+  title: string;
+  image: string; // URL or dataURL
+  video?: string; // optional promo video URL or dataURL
+  price: number; // LKR offer price
+  oldPrice?: number; // LKR original price
+  offer?: string; // short offer label e.g. "Diwali Special -20%"
+  description: string;
+  date: string; // ISO
+}
+
 export interface Settings {
   adminPasswordHash: string;
   announcement: string;
@@ -64,6 +76,7 @@ export interface Settings {
 
 export interface Db {
   products: Product[];
+  promos: Promo[];
   coupons: Coupon[];
   paymentMethods: PaymentMethod[];
   orders: Order[];
@@ -112,6 +125,10 @@ function seedDb(): Db {
   ];
   return {
     products,
+    promos: [
+      { id: 'promo1', title: 'Golden Rose Gift Box — Special Offer', image: pic('onelove-rose'), price: 2490, oldPrice: 3490, offer: 'Festival Special −29%', description: 'Our signature preserved rose in a golden gift box — now at a special festival price. Limited stock!', date: new Date().toISOString() },
+      { id: 'promo2', title: 'RC Racing Car — Flash Deal', image: pic('onelove-rccar'), price: 5990, oldPrice: 7990, offer: 'Flash Deal −25%', description: 'High-speed remote control racing car. Grab it before the flash sale ends!', date: new Date().toISOString() },
+    ],
     coupons: [
       { code: 'WELCOME10', kind: 'percent', value: 10, minOrder: 0, expiry: '2027-12-31', active: true },
       { code: 'LOVE50', kind: 'flat', value: 50, minOrder: 1000, expiry: '2027-12-31', active: true },
@@ -139,7 +156,11 @@ export function loadDb(): Db {
     const raw = window.localStorage.getItem(DB_KEY);
     if (raw) {
       const db = JSON.parse(raw) as Db;
-      if (db && Array.isArray(db.products)) return db;
+      if (db && Array.isArray(db.products)) {
+        // migrate older DBs: ensure promos exist
+        if (!Array.isArray((db as Db).promos)) (db as Db).promos = seedDb().promos;
+        return db;
+      }
     }
   } catch {
     /* corrupted -> reseed below */
