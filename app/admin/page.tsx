@@ -34,6 +34,7 @@ const emptyProduct: Product = {
   oldPrice: undefined,
   category: 'Gifts',
   image: '',
+  video: '',
   stock: 10,
   description: '',
   featured: false,
@@ -180,6 +181,7 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           <input type="number" value={form.price || ''} onChange={(e) => set('price', Number(e.target.value))} placeholder="Price (Rs.) *" className={inputCls} />
           <input type="number" value={form.oldPrice || ''} onChange={(e) => set('oldPrice', Number(e.target.value) || undefined)} placeholder="Old price (Rs., optional)" className={inputCls} />
           <input value={form.image} onChange={(e) => set('image', e.target.value)} placeholder="Image URL * (or upload below)" className={inputCls} />
+          <input value={form.video || ''} onChange={(e) => set('video', e.target.value)} placeholder="Product video URL (mp4, optional)" className={inputCls} />
           <input type="number" value={form.stock} onChange={(e) => set('stock', Number(e.target.value))} placeholder="Stock" className={inputCls} />
           <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Description" rows={2} className="w-full rounded-md bg-white px-3 py-2.5 text-sm outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
           <div>
@@ -238,8 +240,8 @@ function parseBulk(text: string): Omit<Product, 'id' | 'rating' | 'description'>
   for (const rawLine of text.split('\n')) {
     const line = rawLine.trim();
     if (!line || line.startsWith('#')) continue;
-    // name | price | oldPrice | category | imageURL | stock
-    const [name, price, oldPrice, category, image, stock] = line.split('|').map((s) => s.trim());
+    // name | price | oldPrice | category | imageURL | stock | videoURL(optional)
+    const [name, price, oldPrice, category, image, stock, video] = line.split('|').map((s) => s.trim());
     if (!name || !price) continue;
     out.push({
       name,
@@ -247,6 +249,7 @@ function parseBulk(text: string): Omit<Product, 'id' | 'rating' | 'description'>
       oldPrice: oldPrice ? Number(oldPrice) || undefined : undefined,
       category: category || 'Gifts',
       image: image || `https://picsum.photos/seed/${encodeURIComponent(name)}/600/600`,
+      video: video || undefined,
       stock: stock ? Number(stock) : 10,
       featured: false,
       flashSale: false,
@@ -299,7 +302,7 @@ function BulkTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       <p className="mb-3 text-xs text-neutral-600">
         One product per line, fields separated by <code className="text-gold">|</code>:
         <br />
-        <code className="text-neutral-700">name | price | oldPrice | category | imageURL | stock</code>
+        <code className="text-neutral-700">name | price | oldPrice | category | imageURL | stock | videoURL (optional)</code>
         <br />
         oldPrice and stock are optional. Lines starting with # are ignored.
       </p>

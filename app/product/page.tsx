@@ -51,7 +51,17 @@ function DetailInner() {
 
       <div className="mt-4 grid gap-8 md:grid-cols-2">
         <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200">
-          <img src={product.image} alt={product.name} className="aspect-square w-full object-cover" />
+          {product.video ? (
+            <video
+              src={product.video}
+              poster={product.image}
+              controls
+              playsInline
+              className="aspect-square w-full object-cover"
+            />
+          ) : (
+            <img src={product.image} alt={product.name} className="aspect-square w-full object-cover" />
+          )}
           {pct && (
             <span className="absolute left-3 top-3 rounded bg-gold px-2 py-1 text-sm font-bold text-black">
               -{pct}%

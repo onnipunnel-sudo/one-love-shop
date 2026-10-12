@@ -11,6 +11,7 @@ export interface Product {
   oldPrice?: number; // LKR, for discount display
   category: string;
   image: string; // URL or dataURL
+  video?: string; // optional product video URL (mp4)
   stock: number;
   description: string;
   featured?: boolean;
