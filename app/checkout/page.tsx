@@ -77,11 +77,11 @@ function CheckoutInner() {
       <div className="mx-auto max-w-xl py-10 text-center">
         <div className="text-5xl">✅</div>
         <h1 className="mt-4 text-2xl font-bold text-gold">Order placed successfully!</h1>
-        <p className="mt-2 text-sm text-neutral-400">
-          Order <span className="font-mono text-neutral-200">{placed.id}</span> · Total{' '}
+        <p className="mt-2 text-sm text-neutral-600">
+          Order <span className="font-mono text-neutral-800">{placed.id}</span> · Total{' '}
           <span className="font-bold text-gold">{money(placed.total)}</span>
         </p>
-        <p className="mt-3 text-sm text-neutral-400">
+        <p className="mt-3 text-sm text-neutral-600">
           Tap below to send your order to us on WhatsApp for fast confirmation:
         </p>
         <a
@@ -95,7 +95,7 @@ function CheckoutInner() {
         <div>
           <button
             onClick={() => router.push('/')}
-            className="mt-4 text-sm text-neutral-400 underline hover:text-gold"
+            className="mt-4 text-sm text-neutral-600 underline hover:text-gold"
           >
             Continue shopping
           </button>
@@ -106,7 +106,7 @@ function CheckoutInner() {
 
   if (lines.length === 0) {
     return (
-      <div className="py-16 text-center text-neutral-400">
+      <div className="py-16 text-center text-neutral-600">
         Your cart is empty.{' '}
         <button onClick={() => router.push('/')} className="text-gold underline">
           Shop now
@@ -116,7 +116,7 @@ function CheckoutInner() {
   }
 
   const inputCls =
-    'h-11 w-full rounded-md bg-ink-card px-3 text-sm text-neutral-100 outline-none ring-1 ring-white/15 placeholder:text-neutral-500 focus:ring-gold';
+    'h-11 w-full rounded-md bg-white px-3 text-sm text-neutral-900 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold';
 
   return (
     <div className="py-6">
@@ -124,7 +124,7 @@ function CheckoutInner() {
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6">
           {/* Customer details */}
-          <section className="rounded-lg bg-ink-card p-5 ring-1 ring-white/5">
+          <section className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
             <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">
               Delivery Details
             </div>
@@ -136,13 +136,13 @@ function CheckoutInner() {
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Delivery address (street, city)"
                 rows={3}
-                className="w-full rounded-md bg-ink-card px-3 py-2.5 text-sm text-neutral-100 outline-none ring-1 ring-white/15 placeholder:text-neutral-500 focus:ring-gold"
+                className="w-full rounded-md bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold"
               />
             </div>
           </section>
 
           {/* Payment methods */}
-          <section className="rounded-lg bg-ink-card p-5 ring-1 ring-white/5">
+          <section className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
             <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">
               Payment Method
             </div>
@@ -151,7 +151,7 @@ function CheckoutInner() {
                 <label
                   key={m.id}
                   className={`flex cursor-pointer items-start gap-3 rounded-md p-3 ring-1 transition ${
-                    payId === m.id ? 'bg-gold/10 ring-gold' : 'ring-white/10 hover:ring-gold/40'
+                    payId === m.id ? 'bg-gold/10 ring-gold' : 'ring-neutral-300 hover:ring-gold/40'
                   }`}
                 >
                   <input
@@ -162,8 +162,8 @@ function CheckoutInner() {
                     className="mt-1 accent-[#D4AF37]"
                   />
                   <div>
-                    <div className="text-sm font-semibold text-neutral-100">{m.name}</div>
-                    {m.details && <div className="text-xs text-neutral-400">{m.details}</div>}
+                    <div className="text-sm font-semibold text-neutral-900">{m.name}</div>
+                    {m.details && <div className="text-xs text-neutral-600">{m.details}</div>}
                   </div>
                 </label>
               ))}
@@ -174,14 +174,14 @@ function CheckoutInner() {
         </div>
 
         {/* Summary */}
-        <aside className="h-fit rounded-lg bg-ink-card p-5 ring-1 ring-white/5">
+        <aside className="h-fit rounded-lg bg-white p-5 ring-1 ring-neutral-200">
           <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">Order Summary</div>
           <div className="max-h-56 space-y-2 overflow-y-auto text-sm">
             {lines.map((l) => {
               const p = products.get(l.productId);
               if (!p) return null;
               return (
-                <div key={l.productId} className="flex justify-between text-neutral-300">
+                <div key={l.productId} className="flex justify-between text-neutral-700">
                   <span className="line-clamp-1">
                     {p.name} × {l.qty}
                   </span>
@@ -190,8 +190,8 @@ function CheckoutInner() {
               );
             })}
           </div>
-          <div className="mt-4 space-y-1 border-t border-white/10 pt-3 text-sm">
-            <div className="flex justify-between text-neutral-300">
+          <div className="mt-4 space-y-1 border-t border-neutral-200 pt-3 text-sm">
+            <div className="flex justify-between text-neutral-700">
               <span>Subtotal</span>
               <span className="tabular-nums">{money(subtotal)}</span>
             </div>
@@ -220,7 +220,7 @@ function CheckoutInner() {
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={<div className="py-10 text-center text-neutral-400">Loading…</div>}>
+    <Suspense fallback={<div className="py-10 text-center text-neutral-600">Loading…</div>}>
       <CheckoutInner />
     </Suspense>
   );

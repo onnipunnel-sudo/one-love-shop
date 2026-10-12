@@ -28,7 +28,7 @@ function DetailInner() {
   if (!product) {
     return (
       <div className="py-16 text-center">
-        <div className="text-xl text-neutral-300">Product not found.</div>
+        <div className="text-xl text-neutral-700">Product not found.</div>
         <Link href="/" className="mt-4 inline-block text-gold underline">
           Back to home
         </Link>
@@ -45,12 +45,12 @@ function DetailInner() {
 
   return (
     <div className="py-6">
-      <Link href="/" className="text-sm text-neutral-400 hover:text-gold">
+      <Link href="/" className="text-sm text-neutral-600 hover:text-gold">
         ← Back to products
       </Link>
 
       <div className="mt-4 grid gap-8 md:grid-cols-2">
-        <div className="relative overflow-hidden rounded-xl bg-ink-card ring-1 ring-white/5">
+        <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200">
           <img src={product.image} alt={product.name} className="aspect-square w-full object-cover" />
           {pct && (
             <span className="absolute left-3 top-3 rounded bg-gold px-2 py-1 text-sm font-bold text-black">
@@ -61,7 +61,7 @@ function DetailInner() {
 
         <div>
           <div className="text-xs uppercase tracking-wider text-neutral-500">{product.category}</div>
-          <h1 className="mt-1 text-2xl font-bold text-neutral-100">{product.name}</h1>
+          <h1 className="mt-1 text-2xl font-bold text-neutral-900">{product.name}</h1>
           <div className="mt-2">
             <Stars rating={product.rating} />{' '}
             <span className="text-xs text-neutral-500">{product.rating.toFixed(1)} / 5</span>
@@ -83,8 +83,8 @@ function DetailInner() {
           </div>
 
           <div className="mt-6 flex items-center gap-3">
-            <span className="text-sm text-neutral-400">Qty</span>
-            <div className="flex items-center rounded-md ring-1 ring-white/15">
+            <span className="text-sm text-neutral-600">Qty</span>
+            <div className="flex items-center rounded-md ring-1 ring-neutral-200">
               <button
                 onClick={() => setQty((v) => Math.max(1, v - 1))}
                 className="px-3 py-2 text-lg hover:text-gold"
@@ -122,11 +122,11 @@ function DetailInner() {
             </Link>
           </div>
 
-          <div className="mt-8 border-t border-white/5 pt-4">
+          <div className="mt-8 border-t border-neutral-200 pt-4">
             <div className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">
               Description
             </div>
-            <p className="text-sm leading-relaxed text-neutral-300">{product.description}</p>
+            <p className="text-sm leading-relaxed text-neutral-700">{product.description}</p>
           </div>
         </div>
       </div>
@@ -147,7 +147,7 @@ function DetailInner() {
 
 export default function ProductPage() {
   return (
-    <Suspense fallback={<div className="py-10 text-center text-neutral-400">Loading…</div>}>
+    <Suspense fallback={<div className="py-10 text-center text-neutral-600">Loading…</div>}>
       <DetailInner />
     </Suspense>
   );

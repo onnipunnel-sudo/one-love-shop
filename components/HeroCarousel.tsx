@@ -40,7 +40,7 @@ export function HeroCarousel() {
           >
             <div className="flex h-44 flex-col justify-center px-6 sm:h-60 sm:px-10">
               <div className="font-serif text-2xl text-gold sm:text-4xl">{s.title}</div>
-              <div className="mt-2 text-sm text-neutral-300 sm:text-base">{s.sub}</div>
+              <div className="mt-2 text-sm text-neutral-700 sm:text-base">{s.sub}</div>
               <span className="mt-4 inline-block w-fit rounded-md bg-gold px-4 py-2 text-sm font-bold text-black">
                 {s.cta}
               </span>

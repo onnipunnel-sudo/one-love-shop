@@ -166,3 +166,4 @@ export const uid = (p = 'id'): string =>
 export const SHOP_PHONE = '075-1346314';
 export const SHOP_WHATSAPP = '94751346314'; // wa.me needs country code, no +
 export const SHOP_CITY = 'Akkaraipattu';
+export const SHOP_EMAIL = 'rusaikahamed86@gmail.com';

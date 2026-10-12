@@ -21,11 +21,11 @@ import {
 const TABS = ['Products', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
 
 const inputCls =
-  'h-10 w-full rounded-md bg-ink px-3 text-sm text-neutral-100 outline-none ring-1 ring-white/15 placeholder:text-neutral-500 focus:ring-gold';
+  'h-10 w-full rounded-md bg-white px-3 text-sm text-neutral-900 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold';
 const btnGold = 'rounded-md bg-gold px-4 py-2 text-sm font-bold text-black hover:bg-gold-dark';
-const btnGhost = 'rounded-md px-3 py-1.5 text-xs ring-1 ring-white/20 hover:ring-gold hover:text-gold';
+const btnGhost = 'rounded-md px-3 py-1.5 text-xs ring-1 ring-neutral-300 hover:ring-gold hover:text-gold';
 const thCls = 'px-3 py-2 text-left text-xs uppercase tracking-wider text-neutral-500';
-const tdCls = 'px-3 py-2 text-sm text-neutral-300';
+const tdCls = 'px-3 py-2 text-sm text-neutral-700';
 
 const emptyProduct: Product = {
   id: '',
@@ -68,7 +68,7 @@ export default function AdminPage() {
   if (!authed) {
     return (
       <div className="mx-auto max-w-sm py-20">
-        <div className="rounded-xl bg-ink-card p-8 text-center ring-1 ring-gold/30">
+        <div className="rounded-xl bg-white p-8 text-center ring-1 ring-gold/30">
           <img src="/logo.png" alt="ONE LOVE" className="mx-auto h-16 w-16 rounded-full ring-2 ring-gold" />
           <h1 className="mt-4 font-serif text-xl text-gold">Admin Access</h1>
           <p className="mt-1 text-xs text-neutral-500">This area is private.</p>
@@ -110,7 +110,7 @@ export default function AdminPage() {
             key={t}
             onClick={() => setTab(t)}
             className={`rounded-md px-4 py-2 text-sm font-semibold ${
-              tab === t ? 'bg-gold text-black' : 'bg-ink-card text-neutral-300 ring-1 ring-white/10 hover:ring-gold/50'
+              tab === t ? 'bg-gold text-black' : 'bg-white text-neutral-700 ring-1 ring-neutral-300 hover:ring-gold/50'
             }`}
           >
             {t}
@@ -170,7 +170,7 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
   return (
     <div>
-      <div className="mb-4 rounded-lg bg-ink-card p-5 ring-1 ring-white/5">
+      <div className="mb-4 rounded-lg bg-white p-5 ring-1 ring-neutral-200">
         <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">
           {editing ? 'Edit product' : 'Add product'}
         </div>
@@ -181,12 +181,12 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           <input type="number" value={form.oldPrice || ''} onChange={(e) => set('oldPrice', Number(e.target.value) || undefined)} placeholder="Old price (Rs., optional)" className={inputCls} />
           <input value={form.image} onChange={(e) => set('image', e.target.value)} placeholder="Image URL * (or upload below)" className={inputCls} />
           <input type="number" value={form.stock} onChange={(e) => set('stock', Number(e.target.value))} placeholder="Stock" className={inputCls} />
-          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Description" rows={2} className="w-full rounded-md bg-ink px-3 py-2.5 text-sm outline-none ring-1 ring-white/15 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
+          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Description" rows={2} className="w-full rounded-md bg-white px-3 py-2.5 text-sm outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
           <div>
             <div className="mb-1 text-xs text-neutral-500">Or upload an image (saved in browser storage)</div>
-            <input type="file" accept="image/*" onChange={(e) => onFile(e.target.files?.[0])} className="text-xs text-neutral-400" />
+            <input type="file" accept="image/*" onChange={(e) => onFile(e.target.files?.[0])} className="text-xs text-neutral-600" />
           </div>
-          <div className="flex items-center gap-6 text-sm text-neutral-300">
+          <div className="flex items-center gap-6 text-sm text-neutral-700">
             <label className="flex items-center gap-2">
               <input type="checkbox" checked={!!form.featured} onChange={(e) => set('featured', e.target.checked)} className="accent-[#D4AF37]" /> Featured
             </label>
@@ -205,12 +205,12 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         {msg && <div className="mt-2 text-xs text-green-400">{msg}</div>}
       </div>
 
-      <div className="overflow-x-auto rounded-lg bg-ink-card ring-1 ring-white/5">
+      <div className="overflow-x-auto rounded-lg bg-white ring-1 ring-neutral-200">
         <table className="w-full min-w-[720px]">
-          <thead><tr className="border-b border-white/10"><th className={thCls}>Img</th><th className={thCls}>Name</th><th className={thCls}>Price</th><th className={thCls}>Stock</th><th className={thCls}>Flags</th><th className={thCls}>Actions</th></tr></thead>
+          <thead><tr className="border-b border-neutral-200"><th className={thCls}>Img</th><th className={thCls}>Name</th><th className={thCls}>Price</th><th className={thCls}>Stock</th><th className={thCls}>Flags</th><th className={thCls}>Actions</th></tr></thead>
           <tbody>
             {db.products.map((p) => (
-              <tr key={p.id} className="border-b border-white/5">
+              <tr key={p.id} className="border-b border-neutral-200">
                 <td className={tdCls}><img src={p.image} alt="" className="h-10 w-10 rounded object-cover" /></td>
                 <td className={tdCls}>{p.name}<div className="text-xs text-neutral-500">{p.category}</div></td>
                 <td className={tdCls}>{money(p.price)}{p.oldPrice ? <span className="text-xs text-neutral-500 line-through"> {money(p.oldPrice)}</span> : null}</td>
@@ -292,14 +292,14 @@ function BulkTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   };
 
   return (
-    <div className="rounded-lg bg-ink-card p-5 ring-1 ring-white/5">
+    <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
       <div className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">
         Bulk import — 50+ items in 1 click
       </div>
-      <p className="mb-3 text-xs text-neutral-400">
+      <p className="mb-3 text-xs text-neutral-600">
         One product per line, fields separated by <code className="text-gold">|</code>:
         <br />
-        <code className="text-neutral-300">name | price | oldPrice | category | imageURL | stock</code>
+        <code className="text-neutral-700">name | price | oldPrice | category | imageURL | stock</code>
         <br />
         oldPrice and stock are optional. Lines starting with # are ignored.
       </p>
@@ -308,7 +308,7 @@ function BulkTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         onChange={(e) => setText(e.target.value)}
         rows={10}
         placeholder={'Golden Rose Gift Box | 2490 | 3490 | Gifts | https://picsum.photos/seed/rose/600/600 | 25\nBluetooth Earbuds Pro | 4990 | 6990 | Electronics | https://picsum.photos/seed/buds/600/600 | 40'}
-        className="w-full rounded-md bg-ink p-3 font-mono text-xs text-neutral-200 outline-none ring-1 ring-white/15 placeholder:text-neutral-600 focus:ring-gold"
+        className="w-full rounded-md bg-white p-3 font-mono text-xs text-neutral-800 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-600 focus:ring-gold"
       />
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <button onClick={doImport} className={btnGold}>⚡ Import all</button>
@@ -350,7 +350,7 @@ function PaymentsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
   return (
     <div>
-      <div className="mb-4 rounded-lg bg-ink-card p-5 ring-1 ring-white/5">
+      <div className="mb-4 rounded-lg bg-white p-5 ring-1 ring-neutral-200">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">{editingId ? 'Edit' : 'Add'} payment method</div>
         <div className="grid gap-3 sm:grid-cols-2">
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name (e.g. Bank Transfer)" className={inputCls} />
@@ -363,10 +363,10 @@ function PaymentsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       </div>
       <div className="space-y-2">
         {db.paymentMethods.map((m) => (
-          <div key={m.id} className="flex items-center justify-between rounded-lg bg-ink-card p-4 ring-1 ring-white/5">
+          <div key={m.id} className="flex items-center justify-between rounded-lg bg-white p-4 ring-1 ring-neutral-200">
             <div>
-              <div className="text-sm font-semibold text-neutral-100">{m.name}</div>
-              <div className="text-xs text-neutral-400">{m.details || '—'}</div>
+              <div className="text-sm font-semibold text-neutral-900">{m.name}</div>
+              <div className="text-xs text-neutral-600">{m.details || '—'}</div>
             </div>
             <div className="flex gap-2">
               <button onClick={() => { setEditingId(m.id); setName(m.name); setDetails(m.details); }} className={btnGhost}>Edit</button>
@@ -407,7 +407,7 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   return (
     <div className="space-y-6">
       {/* Flash sale countdown setting */}
-      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-white/5">
+      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">⚡ Flash sale countdown ends at</div>
         <div className="flex gap-3">
           <input type="datetime-local" value={flashEnd} onChange={(e) => setFlashEnd(e.target.value)} className={`${inputCls} max-w-xs`} />
@@ -416,7 +416,7 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       </div>
 
       {/* Coupon form */}
-      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-white/5">
+      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">{editing ? 'Edit' : 'Add'} coupon / offer</div>
         <div className="grid gap-3 sm:grid-cols-3">
           <input value={form.code} onChange={(e) => set('code', e.target.value.toUpperCase())} placeholder="CODE (e.g. DIWALI20)" className={inputCls} />
@@ -427,7 +427,7 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           <input type="number" value={form.value} onChange={(e) => set('value', Number(e.target.value))} placeholder="Value" className={inputCls} />
           <input type="number" value={form.minOrder} onChange={(e) => set('minOrder', Number(e.target.value))} placeholder="Min order Rs. (0 = none)" className={inputCls} />
           <input type="date" value={form.expiry} onChange={(e) => set('expiry', e.target.value)} className={inputCls} />
-          <label className="flex items-center gap-2 text-sm text-neutral-300">
+          <label className="flex items-center gap-2 text-sm text-neutral-700">
             <input type="checkbox" checked={form.active} onChange={(e) => set('active', e.target.checked)} className="accent-[#D4AF37]" /> Active
           </label>
         </div>
@@ -438,12 +438,12 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       </div>
 
       {/* Coupon list */}
-      <div className="overflow-x-auto rounded-lg bg-ink-card ring-1 ring-white/5">
+      <div className="overflow-x-auto rounded-lg bg-white ring-1 ring-neutral-200">
         <table className="w-full min-w-[640px]">
-          <thead><tr className="border-b border-white/10"><th className={thCls}>Code</th><th className={thCls}>Discount</th><th className={thCls}>Min order</th><th className={thCls}>Expiry</th><th className={thCls}>Active</th><th className={thCls}>Actions</th></tr></thead>
+          <thead><tr className="border-b border-neutral-200"><th className={thCls}>Code</th><th className={thCls}>Discount</th><th className={thCls}>Min order</th><th className={thCls}>Expiry</th><th className={thCls}>Active</th><th className={thCls}>Actions</th></tr></thead>
           <tbody>
             {db.coupons.map((c) => (
-              <tr key={c.code} className="border-b border-white/5">
+              <tr key={c.code} className="border-b border-neutral-200">
                 <td className={`${tdCls} font-mono text-gold`}>{c.code}</td>
                 <td className={tdCls}>{c.kind === 'percent' ? `${c.value}%` : money(c.value)}</td>
                 <td className={tdCls}>{c.minOrder ? money(c.minOrder) : '—'}</td>
@@ -481,16 +481,16 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   };
 
   if (db.orders.length === 0)
-    return <div className="rounded-lg bg-ink-card p-8 text-center text-neutral-400 ring-1 ring-white/5">No orders yet.</div>;
+    return <div className="rounded-lg bg-white p-8 text-center text-neutral-600 ring-1 ring-neutral-200">No orders yet.</div>;
 
   return (
     <div className="space-y-2">
       {db.orders.map((o) => (
-        <div key={o.id} className="rounded-lg bg-ink-card p-4 ring-1 ring-white/5">
+        <div key={o.id} className="rounded-lg bg-white p-4 ring-1 ring-neutral-200">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <span className="font-mono text-sm text-gold">{o.id}</span>
-              <span className="ml-3 text-sm text-neutral-200">{o.customer} · {o.phone}</span>
+              <span className="ml-3 text-sm text-neutral-800">{o.customer} · {o.phone}</span>
               <div className="text-xs text-neutral-500">
                 {new Date(o.date).toLocaleString()} · {o.paymentMethod} ·{' '}
                 <span className={o.status === 'completed' ? 'text-green-400' : 'text-yellow-400'}>{o.status}</span>
@@ -506,7 +506,7 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             </div>
           </div>
           {open === o.id && (
-            <div className="mt-3 border-t border-white/10 pt-3 text-sm text-neutral-300">
+            <div className="mt-3 border-t border-neutral-200 pt-3 text-sm text-neutral-700">
               <div className="mb-2">📍 {o.address}</div>
               {o.coupon && <div className="mb-2 text-green-400">Coupon: {o.coupon} (−{money(o.discount)})</div>}
               <ul className="space-y-1">
@@ -569,7 +569,7 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-white/5">
+      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">Announcement banner</div>
         <div className="flex gap-3">
           <input value={announcement} onChange={(e) => setAnnouncement(e.target.value)} placeholder="Banner text (empty = hidden)" className={inputCls} />
@@ -577,7 +577,7 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         </div>
       </div>
 
-      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-white/5">
+      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">Change admin password</div>
         <div className="grid gap-3 sm:grid-cols-2">
           <input type="password" value={pw1} onChange={(e) => setPw1(e.target.value)} placeholder="New password" className={inputCls} />
@@ -586,7 +586,7 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         <button onClick={changePw} className={`${btnGold} mt-3`}>Change password</button>
       </div>
 
-      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-white/5">
+      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">Backup / restore</div>
         <div className="flex flex-wrap gap-3">
           <button onClick={exportJson} className={btnGold}>⬇ Export all data (JSON)</button>

@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 body {
-  background-color: #0d0d0f;
+  background-color: #ffffff;
+  color: #171717;
 }
 
 /* thin gold scrollbar for the luxury feel */
@@ -12,7 +13,7 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #141416;
+  background: #f1f1f1;
 }
 ::-webkit-scrollbar-thumb {
   background: #8a6d1f;

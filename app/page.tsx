@@ -42,13 +42,13 @@ function HomeInner() {
 
       {/* Sidebar + hero */}
       <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
-        <aside className="hidden rounded-xl bg-ink-card p-4 ring-1 ring-white/5 lg:block">
+        <aside className="hidden rounded-xl bg-white p-4 ring-1 ring-neutral-200 lg:block">
           <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">
             Categories
           </div>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link href="/" className="text-neutral-300 hover:text-gold">
+              <Link href="/" className="text-neutral-700 hover:text-gold">
                 All Products
               </Link>
             </li>
@@ -56,14 +56,14 @@ function HomeInner() {
               <li key={c}>
                 <Link
                   href={`/?cat=${encodeURIComponent(c)}`}
-                  className={`hover:text-gold ${cat === c ? 'text-gold font-semibold' : 'text-neutral-300'}`}
+                  className={`hover:text-gold ${cat === c ? 'text-gold font-semibold' : 'text-neutral-700'}`}
                 >
                   {c}
                 </Link>
               </li>
             ))}
           </ul>
-          <div className="mt-6 border-t border-white/5 pt-4 text-xs text-neutral-500">
+          <div className="mt-6 border-t border-neutral-200 pt-4 text-xs text-neutral-500">
             💬 WhatsApp orders welcome
             <br />
             📞 075-1346314
@@ -77,10 +77,10 @@ function HomeInner() {
         <section className="mt-8">
           <h2 className="mb-4 text-xl font-bold text-gold">
             {cat ? `${cat}` : `Results for "${params.get('q')}"`}{' '}
-            <span className="text-sm font-normal text-neutral-400">({filtered.length} items)</span>
+            <span className="text-sm font-normal text-neutral-600">({filtered.length} items)</span>
           </h2>
           {filtered.length === 0 ? (
-            <p className="text-neutral-400">No products found. Try another search.</p>
+            <p className="text-neutral-600">No products found. Try another search.</p>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {filtered.map((p) => (
@@ -124,7 +124,7 @@ function HomeInner() {
 export default function Home() {
   // Suspense boundary required for useSearchParams with static export
   return (
-    <Suspense fallback={<div className="py-10 text-center text-neutral-400">Loading…</div>}>
+    <Suspense fallback={<div className="py-10 text-center text-neutral-600">Loading…</div>}>
       <HomeInner />
     </Suspense>
   );

@@ -21,7 +21,7 @@ export function Countdown({ endISO }: { endISO: string }) {
   const m = Math.floor((diff % 3600e3) / 60000);
   const s = Math.floor((diff % 60000) / 1000);
 
-  if (diff <= 0) return <span className="text-sm text-neutral-400">Sale ended</span>;
+  if (diff <= 0) return <span className="text-sm text-neutral-600">Sale ended</span>;
 
   const cell = 'rounded bg-black/60 px-2 py-1 text-lg font-bold text-gold tabular-nums';
   return (

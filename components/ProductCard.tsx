@@ -24,9 +24,9 @@ export function ProductCard({ p }: { p: Product }) {
   return (
     <Link
       href={`/product?id=${p.id}`}
-      className="group flex flex-col overflow-hidden rounded-lg bg-ink-card ring-1 ring-white/5 transition hover:ring-gold/60"
+      className="group flex flex-col overflow-hidden rounded-lg bg-white ring-1 ring-neutral-200 transition hover:ring-gold/60"
     >
-      <div className="relative aspect-square overflow-hidden bg-neutral-900">
+      <div className="relative aspect-square overflow-hidden bg-neutral-100">
         <img
           src={p.image}
           alt={p.name}
@@ -45,7 +45,7 @@ export function ProductCard({ p }: { p: Product }) {
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <div className="line-clamp-2 text-sm text-neutral-200">{p.name}</div>
+        <div className="line-clamp-2 text-sm text-neutral-800">{p.name}</div>
         <div className="mt-auto">
           <div className="text-base font-bold text-gold">{money(p.price)}</div>
           {p.oldPrice && p.oldPrice > p.price && (
