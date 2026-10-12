@@ -18,6 +18,39 @@ import {
   saveDb,
   uid,
 } from '@/lib/store';
+import { dropIdbRef, saveMediaBlob } from '@/lib/mediaStore';
+import { useMediaUrl } from '@/lib/useMediaUrl';
+
+/** Max gallery video size: 500MB (stored in IndexedDB, not localStorage). */
+const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
+
+/** Shared gallery-video picker: stores the file in IndexedDB, returns an `idb:` ref. */
+async function pickGalleryVideo(
+  file: File | undefined,
+  setVideo: (v: string) => void,
+  setMsg: (m: string) => void,
+): Promise<void> {
+  if (!file) return;
+  if (file.size > MAX_VIDEO_BYTES) {
+    setMsg('Video too large (max 500MB) — use a shorter clip.');
+    return;
+  }
+  try {
+    const id = await saveMediaBlob(file);
+    setVideo('idb:' + id);
+    const mb = file.size > 1048576 ? ` (${(file.size / 1048576).toFixed(1)}MB)` : '';
+    setMsg('Video added from gallery' + mb + '.');
+  } catch {
+    setMsg('Could not save video — browser storage blocked it.');
+  }
+}
+
+/** Table thumbnail that resolves idb: video refs. */
+function MediaThumb({ image, video }: { image: string; video?: string }) {
+  const videoUrl = useMediaUrl(video);
+  if (videoUrl) return <video src={videoUrl} className="h-10 w-10 rounded object-cover" muted playsInline />;
+  return <img src={image} alt="" className="h-10 w-10 rounded object-cover" />;
+}
 
 const TABS = ['Products', 'Promos', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
 
@@ -137,6 +170,7 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const [editing, setEditing] = useState<Product | null>(null);
   const [form, setForm] = useState<Product>(emptyProduct);
   const [msg, setMsg] = useState('');
+  const videoUrl = useMediaUrl(form.video);
 
   const set = (k: keyof Product, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -161,17 +195,8 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
     img.src = url;
   };
 
-  const onVideoFile = (file: File | undefined) => {
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      setMsg('Video too large (max 10MB) — use a shorter clip.');
-      return;
-    }
-    const r = new FileReader();
-    r.onload = () => { set('video', String(r.result)); setMsg('Video added from gallery.'); };
-    r.onerror = () => setMsg('Could not read that video.');
-    r.readAsDataURL(file);
-  };
+  const onVideoFile = (file: File | undefined) =>
+    pickGalleryVideo(file, (v) => set('video', v), setMsg);
 
   const save = () => {
     if (!form.name.trim() || !form.price || !form.image) {
@@ -179,6 +204,7 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       return;
     }
     let products: Product[];
+    if (editing && editing.video !== form.video) dropIdbRef(editing.video);
     if (editing) {
       products = db.products.map((p) => (p.id === editing.id ? { ...form, id: editing.id } : p));
     } else {
@@ -197,6 +223,8 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
   const del = (id: string) => {
     if (!confirm('Delete this product?')) return;
+    const gone = db.products.find((p) => p.id === id);
+    if (gone) dropIdbRef(gone.video);
     persist({ ...db, products: db.products.filter((p) => p.id !== id) });
   };
 
@@ -244,7 +272,7 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         </div>
         <div className="mt-3 flex gap-3">
           {form.image && <img src={form.image} alt="preview" className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" />}
-          {form.video && <video src={form.video} className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" muted playsInline />}
+          {videoUrl && <video src={videoUrl} className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" muted playsInline />}
         </div>
         <div className="mt-4 flex gap-2">
           <button onClick={save} className={btnGold}>{editing ? 'Save changes' : 'Add product'}</button>
@@ -261,7 +289,7 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           <tbody>
             {db.products.map((p) => (
               <tr key={p.id} className="border-b border-neutral-200">
-                <td className={tdCls}><img src={p.image} alt="" className="h-10 w-10 rounded object-cover" /></td>
+                <td className={tdCls}><MediaThumb image={p.image} video={p.video} /></td>
                 <td className={tdCls}>{p.name}<div className="text-xs text-neutral-500">{p.category}</div></td>
                 <td className={tdCls}>{money(p.price)}{p.oldPrice ? <span className="text-xs text-neutral-500 line-through"> {money(p.oldPrice)}</span> : null}</td>
                 <td className={tdCls}>{p.stock}</td>
@@ -299,6 +327,7 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const [form, setForm] = useState<Promo>(emptyPromo);
   const [editing, setEditing] = useState<Promo | null>(null);
   const [msg, setMsg] = useState('');
+  const videoUrl = useMediaUrl(form.video);
   const set = (k: keyof Promo, v: string | number | undefined) =>
     setForm((f) => ({ ...f, [k]: v }));
 
@@ -321,17 +350,8 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
     img.src = url;
   };
 
-  const onVideoFile = (file: File | undefined) => {
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      setMsg('Video too large (max 10MB) — use a shorter clip.');
-      return;
-    }
-    const r = new FileReader();
-    r.onload = () => { set('video', String(r.result)); setMsg('Video added from gallery.'); };
-    r.onerror = () => setMsg('Could not read that video.');
-    r.readAsDataURL(file);
-  };
+  const onVideoFile = (file: File | undefined) =>
+    pickGalleryVideo(file, (v) => set('video', v), setMsg);
 
   const save = () => {
     if (!form.title.trim() || !form.price || !form.image) {
@@ -349,6 +369,7 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
     const promos = editing
       ? db.promos.map((p) => (p.id === editing.id ? promo : p))
       : [promo, ...db.promos];
+    if (editing && editing.video !== form.video) dropIdbRef(editing.video);
     try {
       persist({ ...db, promos });
     } catch {
@@ -362,6 +383,8 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
   const del = (id: string) => {
     if (!confirm('Delete this promo?')) return;
+    const gone = db.promos.find((p) => p.id === id);
+    if (gone) dropIdbRef(gone.video);
     persist({ ...db, promos: db.promos.filter((p) => p.id !== id) });
   };
 
@@ -400,7 +423,7 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         </div>
         <div className="mt-3 flex gap-3">
           {form.image && <img src={form.image} alt="preview" className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" />}
-          {form.video && <video src={form.video} className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" muted playsInline />}
+          {videoUrl && <video src={videoUrl} className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" muted playsInline />}
         </div>
         <div className="mt-4 flex gap-2">
           <button onClick={save} className={btnGold}>{editing ? 'Save changes' : 'Post promo'}</button>
@@ -417,11 +440,7 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           <tbody>
             {db.promos.map((p) => (
               <tr key={p.id} className="border-b border-neutral-200">
-                <td className={tdCls}>
-                  {p.video
-                    ? <video src={p.video} className="h-10 w-10 rounded object-cover" muted playsInline />
-                    : <img src={p.image} alt="" className="h-10 w-10 rounded object-cover" />}
-                </td>
+                <td className={tdCls}><MediaThumb image={p.image} video={p.video} /></td>
                 <td className={tdCls}>{p.title}<div className="text-xs text-neutral-500">{new Date(p.date).toLocaleDateString('en-LK')}</div></td>
                 <td className={tdCls}>{money(p.price)}{p.oldPrice ? <span className="text-xs text-neutral-500 line-through"> {money(p.oldPrice)}</span> : null}</td>
                 <td className={tdCls}>{p.offer || '—'}</td>

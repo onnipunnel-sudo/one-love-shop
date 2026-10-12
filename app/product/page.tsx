@@ -7,6 +7,7 @@ import { Suspense, useMemo, useState } from 'react';
 import { useCart } from '@/lib/cart';
 import { ProductCard, Stars, discountPct } from '@/components/ProductCard';
 import { loadDb, money } from '@/lib/store';
+import { useMediaUrl } from '@/lib/useMediaUrl';
 
 function DetailInner() {
   const params = useSearchParams();
@@ -24,6 +25,8 @@ function DetailInner() {
         : [],
     [db, product],
   );
+
+  const videoUrl = useMediaUrl(product?.video);
 
   if (!product) {
     return (
@@ -51,9 +54,9 @@ function DetailInner() {
 
       <div className="mt-4 grid gap-8 md:grid-cols-2">
         <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200">
-          {product.video ? (
+          {videoUrl ? (
             <video
-              src={product.video}
+              src={videoUrl}
               poster={product.image}
               controls
               playsInline
