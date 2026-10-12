@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { useCart } from '@/lib/cart';
 import { SHOP_PHONE } from '@/lib/store';
 
-export const CATEGORIES = ['Gifts', 'Electronics', 'Fashion', 'Home'];
+export const CATEGORIES = ['Girls', 'Boys', 'Gifts', 'Electronics', 'Fashion', 'Home'];
 
 export function Header() {
   const { count } = useCart();

@@ -102,6 +102,12 @@ function seedDb(): Db {
     { id: 'p10', name: 'Chocolate Celebration Hamper', price: 3490, category: 'Gifts', image: pic('onelove-choco'), stock: 33, description: 'Assorted premium chocolates in a golden celebration hamper.', featured: true, rating: 4.8 },
     { id: 'p11', name: 'Stainless Steel Watch — Gold', price: 8990, oldPrice: 11990, category: 'Fashion', image: pic('onelove-watch'), stock: 15, description: 'Elegant gold-tone wristwatch with Japanese movement.', rating: 4.9 },
     { id: 'p12', name: 'Aroma Diffuser with LED', price: 3890, category: 'Home', image: pic('onelove-diffuser'), stock: 26, description: 'Ultrasonic aroma diffuser with 7-colour LED mood light.', rating: 4.4 },
+    { id: 'p13', name: "Girls' Floral Summer Dress", price: 2990, oldPrice: 3990, category: 'Girls', image: pic('onelove-dress'), stock: 30, description: 'Pretty floral summer dress for girls — soft cotton, sizes 4-14.', rating: 4.6 },
+    { id: 'p14', name: "Girls' Hair Accessories Gift Set", price: 1290, category: 'Girls', image: pic('onelove-hairset'), stock: 55, description: '24-piece hair clips, bands and bows gift set in a golden box.', rating: 4.5 },
+    { id: 'p15', name: 'Cute Plush Teddy Bear (60cm)', price: 3490, oldPrice: 4490, category: 'Girls', image: pic('onelove-teddy'), stock: 20, description: 'Super-soft 60cm teddy bear — the perfect cuddly gift.', featured: true, rating: 4.8 },
+    { id: 'p16', name: "Boys' Graphic T-Shirt Pack (3 pcs)", price: 2490, oldPrice: 3290, category: 'Boys', image: pic('onelove-tees'), stock: 40, description: 'Pack of 3 cool graphic tees for boys — 100% cotton.', rating: 4.5 },
+    { id: 'p17', name: 'Remote Control Racing Car', price: 5990, oldPrice: 7990, category: 'Boys', image: pic('onelove-rccar'), stock: 18, description: 'High-speed RC racing car with 2.4GHz controller, 30-min playtime.', flashSale: true, rating: 4.7 },
+    { id: 'p18', name: "Boys' Digital Sports Watch", price: 4490, category: 'Boys', image: pic('onelove-sportwatch'), stock: 25, description: 'Shock-proof digital sports watch with alarm and stopwatch.', rating: 4.4 },
   ];
   return {
     products,
