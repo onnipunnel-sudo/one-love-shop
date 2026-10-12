@@ -4,6 +4,7 @@
 // Products, Bulk Import, Payment Methods, Coupons/Offers, Orders, Settings.
 
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   Coupon,
   Db,
@@ -50,6 +51,41 @@ function MediaThumb({ image, video }: { image: string; video?: string }) {
   const videoUrl = useMediaUrl(video);
   if (videoUrl) return <video src={videoUrl} className="h-10 w-10 rounded object-cover" muted playsInline />;
   return <img src={image} alt="" className="h-10 w-10 rounded object-cover" />;
+}
+
+/** Labeled form field wrapper — keeps every admin input self-explanatory. */
+function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
+  return (
+    <label className="block">
+      <div className="mb-1 text-xs font-semibold text-neutral-600">{label}</div>
+      {children}
+      {hint && <div className="mt-1 text-[11px] leading-snug text-neutral-400">{hint}</div>}
+    </label>
+  );
+}
+
+/** Downscale a gallery photo so it fits browser storage. Resolves to a JPEG dataURL. */
+function downscaleImageFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const max = 1200;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.width * scale));
+        c.height = Math.max(1, Math.round(img.height * scale));
+        c.getContext('2d')?.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL('image/jpeg', 0.82));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('unreadable image')); };
+    img.src = url;
+  });
 }
 
 const TABS = ['Products', 'Promos', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
@@ -235,14 +271,22 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           {editing ? 'Edit product' : 'Add product'}
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Product name *" className={inputCls} />
-          <select value={form.category} onChange={(e) => set('category', e.target.value)} className={inputCls} aria-label="Category">
-            {['Girls', 'Boys', 'All', 'Gifts', 'Electronics', 'Fashion', 'Home'].map((c) => (
-              <option key={c} value={c}>{c === 'All' ? 'All (shows everywhere)' : c}</option>
-            ))}
-          </select>
-          <input type="number" value={form.price || ''} onChange={(e) => set('price', Number(e.target.value))} placeholder="Price (Rs.) *" className={inputCls} />
-          <input type="number" value={form.oldPrice || ''} onChange={(e) => set('oldPrice', Number(e.target.value) || undefined)} placeholder="Old price (Rs., optional)" className={inputCls} />
+          <Field label="Product name *" hint="The title customers see. e.g. Golden Rose Gift Box">
+            <input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="e.g. Golden Rose Gift Box" className={inputCls} />
+          </Field>
+          <Field label="Category *" hint="Girls / Boys = shows in that section. All = shows everywhere.">
+            <select value={form.category} onChange={(e) => set('category', e.target.value)} className={inputCls} aria-label="Category">
+              {['Girls', 'Boys', 'All', 'Gifts', 'Electronics', 'Fashion', 'Home'].map((c) => (
+                <option key={c} value={c}>{c === 'All' ? 'All (shows everywhere)' : c}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Price (Rs.) *" hint="Selling price in rupees. e.g. 2490">
+            <input type="number" value={form.price || ''} onChange={(e) => set('price', Number(e.target.value))} placeholder="e.g. 2490" className={inputCls} />
+          </Field>
+          <Field label="Old price (Rs.)" hint="Optional — shows a discount badge. Must be higher than price. e.g. 3490">
+            <input type="number" value={form.oldPrice || ''} onChange={(e) => set('oldPrice', Number(e.target.value) || undefined)} placeholder="e.g. 3490" className={inputCls} />
+          </Field>
           <div className="sm:col-span-2">
             <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">Photo & video — from gallery</div>
             <div className="flex flex-wrap gap-2">
@@ -263,15 +307,23 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
               <input value={form.video || ''} onChange={(e) => set('video', e.target.value)} placeholder="…or paste video URL (mp4)" className={inputCls} />
             </div>
           </div>
-          <input type="number" value={form.stock} onChange={(e) => set('stock', Number(e.target.value))} placeholder="Stock" className={inputCls} />
-          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Description" rows={2} className="w-full rounded-md bg-white px-3 py-2.5 text-sm outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
-          <div className="flex items-center gap-6 text-sm text-neutral-700">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={!!form.featured} onChange={(e) => set('featured', e.target.checked)} className="accent-[#D4AF37]" /> Featured
-            </label>
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={!!form.flashSale} onChange={(e) => set('flashSale', e.target.checked)} className="accent-[#D4AF37]" /> ⚡ Flash sale
-            </label>
+          <Field label="Stock" hint="How many pieces you have. 0 = shows as out of stock.">
+            <input type="number" value={form.stock} onChange={(e) => set('stock', Number(e.target.value))} placeholder="e.g. 25" className={inputCls} />
+          </Field>
+          <Field label="Description" hint="Short selling text shown on the product page.">
+            <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="e.g. Luxury preserved rose in a golden gift box…" rows={2} className="w-full rounded-md bg-white px-3 py-2.5 text-sm outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
+          </Field>
+          <div className="sm:col-span-2">
+            <div className="mb-1 text-xs font-semibold text-neutral-600">Badges</div>
+            <div className="flex items-center gap-6 text-sm text-neutral-700">
+              <label className="flex items-center gap-2" title="Shows in the Featured section on the homepage">
+                <input type="checkbox" checked={!!form.featured} onChange={(e) => set('featured', e.target.checked)} className="accent-[#D4AF37]" /> ⭐ Featured
+              </label>
+              <label className="flex items-center gap-2" title="Shows in the flash-sale section with countdown">
+                <input type="checkbox" checked={!!form.flashSale} onChange={(e) => set('flashSale', e.target.checked)} className="accent-[#D4AF37]" /> ⚡ Flash sale
+              </label>
+            </div>
+            <div className="mt-1 text-[11px] text-neutral-400">Featured = homepage spotlight. Flash sale = countdown deals section.</div>
           </div>
         </div>
         <div className="mt-3 flex gap-3">
@@ -490,6 +542,136 @@ function BulkTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const [text, setText] = useState('');
   const [msg, setMsg] = useState('');
 
+  // ── Gallery bulk drafts ──
+  interface GalleryDraft {
+    key: string;
+    image: string; // dataURL (photo, or auto-captured video poster)
+    video?: string; // idb: ref for videos
+    previewUrl?: string; // transient object URL for video preview
+    isVideo: boolean;
+    name: string;
+    price: string;
+    oldPrice: string;
+    category: string;
+    stock: string;
+    description: string;
+  }
+  const [drafts, setDrafts] = useState<GalleryDraft[]>([]);
+
+  const setDraft = (key: string, k: keyof GalleryDraft, v: string) =>
+    setDrafts((ds) => ds.map((d) => (d.key === key ? { ...d, [k]: v } : d)));
+
+  const removeDraft = (key: string) => {
+    const gone = drafts.find((d) => d.key === key);
+    if (gone?.video) dropIdbRef(gone.video);
+    if (gone?.previewUrl) URL.revokeObjectURL(gone.previewUrl);
+    setDrafts((ds) => ds.filter((d) => d.key !== key));
+  };
+
+  /** Grab a poster frame from a video file (used as the product photo). */
+  const capturePoster = (file: File): Promise<string> =>
+    new Promise((resolve) => {
+      const done = (v: string) => resolve(v);
+      const timer = setTimeout(() => done(''), 8000);
+      try {
+        const url = URL.createObjectURL(file);
+        const v = document.createElement('video');
+        v.muted = true;
+        (v as HTMLVideoElement).playsInline = true;
+        v.preload = 'auto';
+        v.src = url;
+        v.onloadeddata = () => { try { v.currentTime = Math.min(0.5, (v.duration || 1) / 2); } catch { /* noop */ } };
+        v.onseeked = () => {
+          clearTimeout(timer);
+          try {
+            const s = Math.min(1, 600 / Math.max(v.videoWidth || 600, v.videoHeight || 600));
+            const c = document.createElement('canvas');
+            c.width = Math.max(1, Math.round((v.videoWidth || 600) * s));
+            c.height = Math.max(1, Math.round((v.videoHeight || 600) * s));
+            c.getContext('2d')?.drawImage(v, 0, 0, c.width, c.height);
+            URL.revokeObjectURL(url);
+            done(c.toDataURL('image/jpeg', 0.75));
+          } catch {
+            done('');
+          }
+        };
+        v.onerror = () => { clearTimeout(timer); URL.revokeObjectURL(url); done(''); };
+      } catch {
+        clearTimeout(timer);
+        done('');
+      }
+    });
+
+  const onGalleryFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setMsg('Reading gallery files…');
+    const next: GalleryDraft[] = [];
+    for (const file of Array.from(files)) {
+      const base = file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim() || 'New product';
+      if (file.type.startsWith('image/')) {
+        try {
+          const dataUrl = await downscaleImageFile(file);
+          next.push({ key: uid('d'), image: dataUrl, isVideo: false, name: base, price: '', oldPrice: '', category: 'Gifts', stock: '10', description: '' });
+        } catch {
+          /* skip unreadable */
+        }
+      } else if (file.type.startsWith('video/')) {
+        if (file.size > MAX_VIDEO_BYTES) {
+          setMsg(`"${file.name}" is over 500MB — skipped.`);
+          continue;
+        }
+        try {
+          const id = await saveMediaBlob(file);
+          const poster = await capturePoster(file);
+          next.push({
+            key: uid('d'), image: poster, video: 'idb:' + id,
+            previewUrl: URL.createObjectURL(file), isVideo: true,
+            name: base, price: '', oldPrice: '', category: 'Gifts', stock: '10', description: '',
+          });
+        } catch {
+          setMsg(`Could not save "${file.name}".`);
+        }
+      }
+    }
+    if (next.length > 0) {
+      setDrafts((d) => [...d, ...next]);
+      setMsg(`${next.length} file(s) ready — fill in the details below, then hit “Add all products”.`);
+    }
+  };
+
+  const addAll = () => {
+    const valid = drafts.filter((d) => d.name.trim() && Number(d.price) > 0 && (d.image || d.video));
+    if (valid.length === 0) {
+      setMsg('Fill name + price for at least one item (photo/video required).');
+      return;
+    }
+    try {
+      const products = [
+        ...db.products,
+        ...valid.map((d) => ({
+          id: uid('p'),
+          name: d.name.trim(),
+          price: Number(d.price),
+          oldPrice: d.oldPrice ? Number(d.oldPrice) || undefined : undefined,
+          category: d.category,
+          image: d.image,
+          video: d.video || undefined,
+          stock: d.stock ? Number(d.stock) : 10,
+          description: d.description.trim() || d.name.trim(),
+          featured: false,
+          flashSale: false,
+          rating: 4.5,
+        })),
+      ];
+      persist({ ...db, products });
+    } catch {
+      setMsg('Storage full — some videos too large.');
+      return;
+    }
+    setDrafts([]);
+    setMsg(`✅ Added ${valid.length} product${valid.length === 1 ? '' : 's'} from gallery!`);
+  };
+
   const doImport = () => {
     const items = parseBulk(text);
     if (items.length === 0) {
@@ -523,6 +705,7 @@ function BulkTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   };
 
   return (
+    <>
     <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
       <div className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">
         Bulk import — 50+ items in 1 click
@@ -551,6 +734,79 @@ function BulkTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       </div>
       {msg && <div className="mt-3 text-sm text-green-400">{msg}</div>}
     </div>
+
+    {/* ── Bulk from gallery ── */}
+    <div className="mt-4 rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+      <div className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">
+        📷 Bulk from gallery — select many at once
+      </div>
+      <p className="mb-3 text-xs text-neutral-600">
+        Pick multiple photos/videos from the gallery in one go, then fill in the details for each below
+        and hit <b>“Add all products”</b>. Photos are auto-compressed; videos up to 500MB each.
+      </p>
+      <label className={`${btnGhost} cursor-pointer`}>
+        🖼️ Select photos / videos from gallery
+        <input
+          type="file"
+          accept="image/*,video/*"
+          multiple
+          className="hidden"
+          onChange={(e) => { onGalleryFiles(e.target.files); e.target.value = ''; }}
+        />
+      </label>
+
+      {drafts.length > 0 && (
+        <>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {drafts.map((d) => (
+              <div key={d.key} className="rounded-lg p-3 ring-1 ring-neutral-200">
+                <div className="flex gap-3">
+                  {d.isVideo ? (
+                    <video src={d.previewUrl} className="h-16 w-16 shrink-0 rounded object-cover" muted playsInline />
+                  ) : (
+                    <img src={d.image} alt="" className="h-16 w-16 shrink-0 rounded object-cover" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <Field label="Product name *">
+                      <input value={d.name} onChange={(e) => setDraft(d.key, 'name', e.target.value)} placeholder="e.g. Golden Rose Gift Box" className={inputCls} />
+                    </Field>
+                  </div>
+                  <button onClick={() => removeDraft(d.key)} className="h-8 shrink-0 text-xs text-neutral-400 hover:text-red-500" aria-label="Remove">✕</button>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <Field label="Price (Rs.) *">
+                    <input type="number" value={d.price} onChange={(e) => setDraft(d.key, 'price', e.target.value)} placeholder="2490" className={inputCls} />
+                  </Field>
+                  <Field label="Old price (Rs.)" hint="For discount display">
+                    <input type="number" value={d.oldPrice} onChange={(e) => setDraft(d.key, 'oldPrice', e.target.value)} placeholder="3490" className={inputCls} />
+                  </Field>
+                  <Field label="Category *">
+                    <select value={d.category} onChange={(e) => setDraft(d.key, 'category', e.target.value)} className={inputCls}>
+                      {['Girls', 'Boys', 'All', 'Gifts', 'Electronics', 'Fashion', 'Home'].map((c) => (
+                        <option key={c} value={c}>{c === 'All' ? 'All (shows everywhere)' : c}</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Stock">
+                    <input type="number" value={d.stock} onChange={(e) => setDraft(d.key, 'stock', e.target.value)} placeholder="10" className={inputCls} />
+                  </Field>
+                </div>
+                <div className="mt-2">
+                  <Field label="Description">
+                    <input value={d.description} onChange={(e) => setDraft(d.key, 'description', e.target.value)} placeholder="Short selling description" className={inputCls} />
+                  </Field>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button onClick={addAll} className={btnGold}>⚡ Add all products ({drafts.length})</button>
+            <button onClick={() => setDrafts([])} className={btnGhost}>Clear all</button>
+          </div>
+        </>
+      )}
+    </div>
+    </>
   );
 }
 
@@ -648,20 +904,51 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
       {/* Coupon form */}
       <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
-        <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">{editing ? 'Edit' : 'Add'} coupon / offer</div>
+        <div className="mb-1 text-sm font-bold uppercase tracking-wider text-gold">{editing ? 'Edit' : 'Add'} coupon / offer</div>
+        <p className="mb-3 text-xs text-neutral-500">
+          Coupons give customers a discount at checkout when they type the code.
+          Example: code <b>DIWALI20</b>, type <b>% percent off</b>, value <b>20</b> → customer gets 20% off.
+        </p>
         <div className="grid gap-3 sm:grid-cols-3">
-          <input value={form.code} onChange={(e) => set('code', e.target.value.toUpperCase())} placeholder="CODE (e.g. DIWALI20)" className={inputCls} />
-          <select value={form.kind} onChange={(e) => set('kind', e.target.value)} className={inputCls}>
-            <option value="percent">% percent off</option>
-            <option value="flat">Rs. flat off</option>
-          </select>
-          <input type="number" value={form.value} onChange={(e) => set('value', Number(e.target.value))} placeholder="Value" className={inputCls} />
-          <input type="number" value={form.minOrder} onChange={(e) => set('minOrder', Number(e.target.value))} placeholder="Min order Rs. (0 = none)" className={inputCls} />
-          <input type="date" value={form.expiry} onChange={(e) => set('expiry', e.target.value)} className={inputCls} />
-          <label className="flex items-center gap-2 text-sm text-neutral-700">
-            <input type="checkbox" checked={form.active} onChange={(e) => set('active', e.target.checked)} className="accent-[#D4AF37]" /> Active
-          </label>
+          <Field label="Coupon code *" hint="What the customer types at checkout. CAPS, no spaces. e.g. DIWALI20, WELCOME10">
+            <input value={form.code} onChange={(e) => set('code', e.target.value.toUpperCase())} placeholder="e.g. DIWALI20" className={inputCls} />
+          </Field>
+          <Field label="Offer type *" hint="% percent off = percentage of the cart total. Rs. flat off = fixed rupees off.">
+            <select value={form.kind} onChange={(e) => set('kind', e.target.value)} className={inputCls}>
+              <option value="percent">% percent off</option>
+              <option value="flat">Rs. flat off</option>
+            </select>
+          </Field>
+          <Field
+            label={form.kind === 'percent' ? 'Percent value *' : 'Rupees value *'}
+            hint={form.kind === 'percent' ? 'e.g. 20 = 20% off. 100 = full 100% off (free!).' : 'e.g. 500 = Rs. 500 off the total.'}
+          >
+            <input type="number" value={form.value} onChange={(e) => set('value', Number(e.target.value))} placeholder={form.kind === 'percent' ? 'e.g. 20' : 'e.g. 500'} className={inputCls} />
+          </Field>
+          <Field label="Minimum order (Rs.)" hint="Coupon works only if the cart total is at least this much. 0 = works on any order.">
+            <input type="number" value={form.minOrder} onChange={(e) => set('minOrder', Number(e.target.value))} placeholder="e.g. 1000" className={inputCls} />
+          </Field>
+          <Field label="Expiry date *" hint="After this date the coupon stops working automatically.">
+            <input type="date" value={form.expiry} onChange={(e) => set('expiry', e.target.value)} className={inputCls} />
+          </Field>
+          <Field label="Active?" hint="Turn off to pause the coupon without deleting it.">
+            <label className="flex h-10 items-center gap-2 text-sm text-neutral-700">
+              <input type="checkbox" checked={form.active} onChange={(e) => set('active', e.target.checked)} className="accent-[#D4AF37]" /> Active
+            </label>
+          </Field>
         </div>
+        {form.code.trim() && (
+          <div className="mt-3 rounded-md bg-neutral-50 p-3 text-xs text-neutral-600 ring-1 ring-neutral-200">
+            Preview: customer types <b className="text-gold">{form.code.trim().toUpperCase()}</b> on a Rs. 2,000 cart
+            {form.minOrder > 2000 ? (
+              <> → <b className="text-red-500">won't apply</b> (needs Rs. {form.minOrder.toLocaleString('en-LK')} minimum)</>
+            ) : (
+              <> → pays <b>{form.kind === 'percent'
+                ? `Rs. ${(2000 * (1 - form.value / 100)).toLocaleString('en-LK')} (${form.value}% off)`
+                : `Rs. ${Math.max(0, 2000 - form.value).toLocaleString('en-LK')} (Rs. ${form.value} off)`}</b></>
+            )}
+          </div>
+        )}
         <div className="mt-3 flex gap-2">
           <button onClick={save} className={btnGold}>{editing ? 'Save' : 'Add coupon'}</button>
           {editing && <button onClick={() => { setEditing(null); setForm({ code: '', kind: 'percent', value: 10, minOrder: 0, expiry: '2027-12-31', active: true }); }} className={btnGhost}>Cancel</button>}
@@ -757,7 +1044,6 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
 function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const [announcement, setAnnouncement] = useState(db.settings.announcement);
-  const [groqKey, setGroqKey] = useState(db.settings.groqApiKey || '');
   const [pw1, setPw1] = useState('');
   const [pw2, setPw2] = useState('');
   const [msg, setMsg] = useState('');
@@ -765,11 +1051,6 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const saveAnnouncement = () => {
     persist({ ...db, settings: { ...db.settings, announcement } });
     setMsg('Announcement banner updated.');
-  };
-
-  const saveGroqKey = () => {
-    persist({ ...db, settings: { ...db.settings, groqApiKey: groqKey.trim() || undefined } });
-    setMsg(groqKey.trim() ? 'Groq API key saved — AI chat agent is live.' : 'Groq API key removed — AI chat agent is off.');
   };
 
   const changePw = () => {
@@ -815,14 +1096,13 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       </div>
 
       <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
-        <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">AI support agent (Groq)</div>
-        <div className="text-xs text-neutral-500 mb-2">
-          Powers the chat helper on the store — answers customer questions in Tamil, English, Sinhala and more.
-          Paste your Groq API key here (kept in this browser only). Get one free at console.groq.com.
-        </div>
-        <div className="flex gap-3">
-          <input type="password" value={groqKey} onChange={(e) => setGroqKey(e.target.value)} placeholder="gsk_… paste Groq API key" className={inputCls} />
-          <button onClick={saveGroqKey} className={btnGold}>Save</button>
+        <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">AI support agent (Lova)</div>
+        <div className="text-xs leading-relaxed text-neutral-600">
+          The 💬 chat helper on the store answers customers in Tamil, English, Sinhala and more, using your products and prices.
+          <br /><br />
+          <b>Setup (one time):</b> get a free API key at <b>console.groq.com</b>, then in Vercel open this project →
+          <b> Settings → Environment Variables</b> → add <code className="text-gold">GROQ_API_KEY</code> = your key → <b>Redeploy</b>.
+          The key stays on the server — it is never shown to visitors.
         </div>
       </div>
 
