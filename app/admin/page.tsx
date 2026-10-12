@@ -236,7 +236,11 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Product name *" className={inputCls} />
-          <input value={form.category} onChange={(e) => set('category', e.target.value)} placeholder="Category (Gifts, Electronics, Fashion, Home)" className={inputCls} />
+          <select value={form.category} onChange={(e) => set('category', e.target.value)} className={inputCls} aria-label="Category">
+            {['Girls', 'Boys', 'All', 'Gifts', 'Electronics', 'Fashion', 'Home'].map((c) => (
+              <option key={c} value={c}>{c === 'All' ? 'All (shows everywhere)' : c}</option>
+            ))}
+          </select>
           <input type="number" value={form.price || ''} onChange={(e) => set('price', Number(e.target.value))} placeholder="Price (Rs.) *" className={inputCls} />
           <input type="number" value={form.oldPrice || ''} onChange={(e) => set('oldPrice', Number(e.target.value) || undefined)} placeholder="Old price (Rs., optional)" className={inputCls} />
           <div className="sm:col-span-2">
@@ -753,6 +757,7 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
 function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const [announcement, setAnnouncement] = useState(db.settings.announcement);
+  const [groqKey, setGroqKey] = useState(db.settings.groqApiKey || '');
   const [pw1, setPw1] = useState('');
   const [pw2, setPw2] = useState('');
   const [msg, setMsg] = useState('');
@@ -760,6 +765,11 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const saveAnnouncement = () => {
     persist({ ...db, settings: { ...db.settings, announcement } });
     setMsg('Announcement banner updated.');
+  };
+
+  const saveGroqKey = () => {
+    persist({ ...db, settings: { ...db.settings, groqApiKey: groqKey.trim() || undefined } });
+    setMsg(groqKey.trim() ? 'Groq API key saved — AI chat agent is live.' : 'Groq API key removed — AI chat agent is off.');
   };
 
   const changePw = () => {
@@ -801,6 +811,18 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         <div className="flex gap-3">
           <input value={announcement} onChange={(e) => setAnnouncement(e.target.value)} placeholder="Banner text (empty = hidden)" className={inputCls} />
           <button onClick={saveAnnouncement} className={btnGold}>Save</button>
+        </div>
+      </div>
+
+      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+        <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">AI support agent (Groq)</div>
+        <div className="text-xs text-neutral-500 mb-2">
+          Powers the chat helper on the store — answers customer questions in Tamil, English, Sinhala and more.
+          Paste your Groq API key here (kept in this browser only). Get one free at console.groq.com.
+        </div>
+        <div className="flex gap-3">
+          <input type="password" value={groqKey} onChange={(e) => setGroqKey(e.target.value)} placeholder="gsk_… paste Groq API key" className={inputCls} />
+          <button onClick={saveGroqKey} className={btnGold}>Save</button>
         </div>
       </div>
 

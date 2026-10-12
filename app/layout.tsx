@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { BottomNav } from '@/components/BottomNav';
 import { WhatsAppFloat } from '@/components/WhatsAppFloat';
+import { SupportChat } from '@/components/SupportChat';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <BottomNav />
           <WhatsAppFloat />
+          <SupportChat />
         </CartProvider>
       </body>
     </html>

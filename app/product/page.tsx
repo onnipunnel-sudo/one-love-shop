@@ -21,7 +21,7 @@ function DetailInner() {
   const related = useMemo(
     () =>
       product
-        ? db.products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 5)
+        ? db.products.filter((p) => p.id !== product.id && (p.category === product.category || p.category === 'All')).slice(0, 5)
         : [],
     [db, product],
   );

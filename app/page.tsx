@@ -21,7 +21,7 @@ function HomeInner() {
 
   const filtered = useMemo(() => {
     return db.products.filter((p) => {
-      if (cat && p.category !== cat) return false;
+      if (cat && p.category !== cat && p.category !== 'All') return false;
       if (q && !(p.name + ' ' + p.description + ' ' + p.category).toLowerCase().includes(q))
         return false;
       return true;

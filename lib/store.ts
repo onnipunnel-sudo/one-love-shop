@@ -72,6 +72,7 @@ export interface Settings {
   adminPasswordHash: string;
   announcement: string;
   flashSaleEnd: string; // ISO datetime
+  groqApiKey?: string; // for the AI support chat agent (stored in browser only)
 }
 
 export interface Db {
@@ -159,6 +160,7 @@ export function loadDb(): Db {
       if (db && Array.isArray(db.products)) {
         // migrate older DBs: ensure promos exist
         if (!Array.isArray((db as Db).promos)) (db as Db).promos = seedDb().promos;
+        db.settings = { ...seedDb().settings, ...db.settings };
         return db;
       }
     }
