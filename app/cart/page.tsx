@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useCart } from '@/lib/cart';
 import { validateCoupon } from '@/lib/coupon';
-import { loadDb, money } from '@/lib/store';
+import { loadDb, money, productSlug } from '@/lib/store';
 
 export default function CartPage() {
   const { lines, setQty, remove, subtotal } = useCart();
@@ -60,11 +60,11 @@ export default function CartPage() {
                 key={l.productId}
                 className="flex gap-4 rounded-lg bg-white p-3 ring-1 ring-neutral-200"
               >
-                <Link href={`/product?id=${p.id}`} className="shrink-0">
+                <Link href={`/product/${productSlug(p.name)}/`} className="shrink-0">
                   <img src={p.image} alt={p.name} className="h-20 w-20 rounded-md object-cover" />
                 </Link>
                 <div className="flex flex-1 flex-col">
-                  <Link href={`/product?id=${p.id}`} className="text-sm text-neutral-800 hover:text-gold">
+                  <Link href={`/product/${productSlug(p.name)}/`} className="text-sm text-neutral-800 hover:text-gold">
                     {p.name}
                   </Link>
                   <div className="mt-1 text-sm font-bold text-gold">{money(p.price)}</div>

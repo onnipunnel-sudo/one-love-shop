@@ -2,7 +2,7 @@
 // Daraz-style product card: image, name, price, old price + discount badge, stars.
 
 import Link from 'next/link';
-import { Product, money } from '@/lib/store';
+import { Product, money, productSlug } from '@/lib/store';
 
 export function Stars({ rating }: { rating: number }) {
   const full = Math.round(rating);
@@ -23,7 +23,7 @@ export function ProductCard({ p }: { p: Product }) {
   const pct = discountPct(p);
   return (
     <Link
-      href={`/product?id=${p.id}`}
+      href={`/product/${productSlug(p.name)}/`}
       className="group flex flex-col overflow-hidden rounded-lg bg-white ring-1 ring-neutral-200 transition hover:ring-gold/60"
     >
       <div className="relative aspect-square overflow-hidden bg-neutral-100">

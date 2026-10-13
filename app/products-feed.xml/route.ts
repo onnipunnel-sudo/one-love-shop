@@ -1,0 +1,45 @@
+import { loadDb, productSlug, money } from '@/lib/store';
+
+const SITE_URL = 'https://one-love-shop.vercel.app';
+
+// Google Merchant Center product feed (RSS 2.0 + Google namespace).
+// Kayer: upload this URL in Merchant Center > Products > Feeds:
+//   https://one-love-shop.vercel.app/products-feed.xml
+export async function GET() {
+  const db = loadDb();
+  const items = db.products
+    .map((p) => {
+      const url = `${SITE_URL}/product/${productSlug(p.name)}/`;
+      const availability = p.stock > 0 ? 'in_stock' : 'out_of_stock';
+      const salePrice = p.oldPrice && p.oldPrice > p.price ? p.oldPrice : null;
+      return `    <item>
+      <g:id>${p.id}</g:id>
+      <g:title><![CDATA[${p.name}]]></g:title>
+      <g:description><![CDATA[${p.description}]]></g:description>
+      <g:link>${url}</g:link>
+      <g:image_link>${p.image}</g:image_link>
+      <g:condition>new</g:condition>
+      <g:availability>${availability}</g:availability>
+      <g:price>${p.price} LKR</g:price>
+      ${salePrice ? `<g:sale_price>${salePrice} LKR</g:sale_price>` : ''}
+      <g:brand>ONE LOVE</g:brand>
+      <g:product_type><![CDATA[${p.category}]]></g:product_type>
+      <g:google_product_category>Gift &amp; Lifestyle</g:google_product_category>
+    </item>`;
+    })
+    .join('\n');
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
+  <channel>
+    <title>ONE LOVE — Product Feed</title>
+    <link>${SITE_URL}/</link>
+    <description>ONE LOVE Sri Lanka product feed for Google Merchant Center.</description>
+${items}
+  </channel>
+</rss>`;
+
+  return new Response(xml, {
+    headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+  });
+}

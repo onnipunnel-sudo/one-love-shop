@@ -190,6 +190,21 @@ export function refreshDb(): Db {
 
 export const money = (n: number): string => 'Rs. ' + n.toLocaleString('en-LK');
 
+/** URL-friendly slug from product name, e.g. "Golden Rose Gift Box" -> "golden-rose-gift-box" */
+export function productSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+/** Find a product by its slug (matches seed products at build time). */
+export function findBySlug(products: Product[], slug: string): Product | undefined {
+  return products.find((p) => productSlug(p.name) === slug || p.id === slug);
+}
+
 export const uid = (p = 'id'): string =>
   p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
