@@ -61,9 +61,7 @@ export const metadata: Metadata = {
     },
   },
   icons: { icon: '/logo.png' },
-  // Google Search Console verification: Kayer adds his verification string here
-  // after registering the site at https://search.google.com/search-console
-  // verification: { google: 'PASTE_VERIFICATION_CODE_HERE' },
+  verification: { google: 'JF18x-6SjXWAHZAQ_h2nU4APsS5iDsJyLpxBXJ7wTxE' },
 };
 
 const orgJsonLd = {
