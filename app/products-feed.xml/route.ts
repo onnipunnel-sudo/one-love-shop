@@ -12,12 +12,13 @@ export async function GET() {
       const url = `${SITE_URL}/product/${productSlug(p.name)}/`;
       const availability = p.stock > 0 ? 'in_stock' : 'out_of_stock';
       const salePrice = p.oldPrice && p.oldPrice > p.price ? p.oldPrice : null;
+      const imageUrl = p.image.startsWith('http') ? p.image : `${SITE_URL}${p.image}`;
       return `    <item>
       <g:id>${p.id}</g:id>
       <g:title><![CDATA[${p.name}]]></g:title>
       <g:description><![CDATA[${p.description}]]></g:description>
       <g:link>${url}</g:link>
-      <g:image_link>${p.image}</g:image_link>
+      <g:image_link>${imageUrl}</g:image_link>
       <g:condition>new</g:condition>
       <g:availability>${availability}</g:availability>
       <g:price>${p.price} LKR</g:price>
