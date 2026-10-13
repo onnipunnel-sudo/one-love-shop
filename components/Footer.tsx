@@ -1,5 +1,6 @@
 // Site footer with shop info.
 
+import Link from 'next/link';
 import { SHOP_CITY, SHOP_EMAIL, SHOP_PHONE } from '@/lib/store';
 
 export function Footer() {
