@@ -288,7 +288,7 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             <input type="number" value={form.oldPrice || ''} onChange={(e) => set('oldPrice', Number(e.target.value) || undefined)} placeholder="e.g. 3490" className={inputCls} />
           </Field>
           <div className="sm:col-span-2">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">Photo & video — from gallery</div>
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">Photo & video — from gallery only</div>
             <div className="flex flex-wrap gap-2">
               <label className={`${btnGhost} cursor-pointer`}>
                 📷 Add photo from gallery
@@ -302,13 +302,9 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
                 <button type="button" onClick={() => set('video', '')} className={`${btnGhost} hover:!text-red-400`}>✕ Remove video</button>
               )}
             </div>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              <input value={form.image} onChange={(e) => set('image', e.target.value)} placeholder="…or paste image URL" className={inputCls} />
-              <input value={form.video || ''} onChange={(e) => set('video', e.target.value)} placeholder="…or paste video URL (mp4)" className={inputCls} />
-            </div>
           </div>
           <Field label="Stock" hint="How many pieces you have. 0 = shows as out of stock.">
-            <input type="number" value={form.stock} onChange={(e) => set('stock', Number(e.target.value))} placeholder="e.g. 25" className={inputCls} />
+            <input type="number" value={form.stock || ''} onChange={(e) => set('stock', Number(e.target.value))} placeholder="e.g. 25" className={inputCls} />
           </Field>
           <Field label="Description" hint="Short selling text shown on the product page.">
             <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="e.g. Luxury preserved rose in a golden gift box…" rows={2} className="w-full rounded-md bg-white px-3 py-2.5 text-sm outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
@@ -410,8 +406,8 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
     pickGalleryVideo(file, (v) => set('video', v), setMsg);
 
   const save = () => {
-    if (!form.title.trim() || !form.price || !form.image) {
-      setMsg('Title, price and image are required.');
+    if (!form.video?.trim() && !form.description.trim()) {
+      setMsg('Add a video or a description (at least one is required).');
       return;
     }
     const promo: Promo = {
@@ -451,31 +447,27 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           {editing ? 'Edit promo' : 'New promo post'}
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <input value={form.title} onChange={(e) => set('title', e.target.value)} placeholder="Promo title *" className={`${inputCls} sm:col-span-2`} />
-          <input type="number" value={form.price || ''} onChange={(e) => set('price', Number(e.target.value))} placeholder="Offer price (Rs.) *" className={inputCls} />
-          <input type="number" value={form.oldPrice || ''} onChange={(e) => set('oldPrice', Number(e.target.value) || undefined)} placeholder="Original price (Rs.)" className={inputCls} />
-          <input value={form.offer || ''} onChange={(e) => set('offer', e.target.value)} placeholder="Offer label (e.g. Festival Special −30%)" className={`${inputCls} sm:col-span-2`} />
+          <input value={form.title} onChange={(e) => set('title', e.target.value)} placeholder="Promo title (optional)" className={`${inputCls} sm:col-span-2`} />
+          <input type="number" value={form.price || ''} onChange={(e) => set('price', Number(e.target.value))} placeholder="Offer price (Rs.) — optional" className={inputCls} />
+          <input type="number" value={form.oldPrice || ''} onChange={(e) => set('oldPrice', Number(e.target.value) || undefined)} placeholder="Original price (Rs.) — optional" className={inputCls} />
+          <input value={form.offer || ''} onChange={(e) => set('offer', e.target.value)} placeholder="Offer label (optional, e.g. Festival Special −30%)" className={`${inputCls} sm:col-span-2`} />
           <div className="sm:col-span-2">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">Photo & video — from gallery</div>
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">Photo & video — from gallery only</div>
             <div className="flex flex-wrap gap-2">
               <label className={`${btnGhost} cursor-pointer`}>
-                📷 Photo from gallery
+                📷 Photo from gallery (optional)
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => { onImageFile(e.target.files?.[0]); e.target.value = ''; }} />
               </label>
               <label className={`${btnGhost} cursor-pointer`}>
-                🎥 Video from gallery
+                🎥 Video from gallery *
                 <input type="file" accept="video/*" className="hidden" onChange={(e) => { onVideoFile(e.target.files?.[0]); e.target.value = ''; }} />
               </label>
               {form.video && (
                 <button type="button" onClick={() => set('video', '')} className={`${btnGhost} hover:!text-red-400`}>✕ Remove video</button>
               )}
             </div>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              <input value={form.image} onChange={(e) => set('image', e.target.value)} placeholder="…or paste image URL" className={inputCls} />
-              <input value={form.video || ''} onChange={(e) => set('video', e.target.value)} placeholder="…or paste video URL (mp4)" className={inputCls} />
-            </div>
           </div>
-          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Description — sell it here" rows={3} className="w-full rounded-md bg-white px-3 py-2.5 text-sm outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
+          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Description * — sell it here" rows={3} className="w-full rounded-md bg-white px-3 py-2.5 text-sm outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
         </div>
         <div className="mt-3 flex gap-3">
           {form.image && <img src={form.image} alt="preview" className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" />}
@@ -515,31 +507,9 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   );
 }
 
-/* ───────────────────────── Bulk import ───────────────────────── */function parseBulk(text: string): Omit<Product, 'id' | 'rating' | 'description'>[] {
-  const out: Omit<Product, 'id' | 'rating' | 'description'>[] = [];
-  for (const rawLine of text.split('\n')) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith('#')) continue;
-    // name | price | oldPrice | category | imageURL | stock | videoURL(optional)
-    const [name, price, oldPrice, category, image, stock, video] = line.split('|').map((s) => s.trim());
-    if (!name || !price) continue;
-    out.push({
-      name,
-      price: Number(price) || 0,
-      oldPrice: oldPrice ? Number(oldPrice) || undefined : undefined,
-      category: category || 'Gifts',
-      image: image || `https://picsum.photos/seed/${encodeURIComponent(name)}/600/600`,
-      video: video || undefined,
-      stock: stock ? Number(stock) : 10,
-      featured: false,
-      flashSale: false,
-    });
-  }
-  return out;
-}
+/* ───────────────────────── Bulk import ───────────────────────── */
 
 function BulkTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
-  const [text, setText] = useState('');
   const [msg, setMsg] = useState('');
 
   // ── Gallery bulk drafts ──
@@ -672,71 +642,8 @@ function BulkTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
     setMsg(`✅ Added ${valid.length} product${valid.length === 1 ? '' : 's'} from gallery!`);
   };
 
-  const doImport = () => {
-    const items = parseBulk(text);
-    if (items.length === 0) {
-      setMsg('Nothing to import — check the format (one product per line).');
-      return;
-    }
-    const products = [
-      ...db.products,
-      ...items.map((it) => ({ ...it, id: uid('p'), rating: 4.5, description: it.name })),
-    ];
-    persist({ ...db, products });
-    setMsg(`✅ Imported ${items.length} product${items.length === 1 ? '' : 's'} in one click!`);
-    setText('');
-  };
-
-  const onCsv = (file: File | undefined) => {
-    if (!file) return;
-    const r = new FileReader();
-    r.onload = () => {
-      // CSV: name,price,oldPrice,category,imageURL,stock → convert commas to pipes
-      const asPipes = String(r.result)
-        .split('\n')
-        .map((l) => l.trim())
-        .filter(Boolean)
-        .map((l) => l.split(',').map((s) => s.trim()).join(' | '))
-        .join('\n');
-      setText(asPipes);
-      setMsg('CSV loaded into the box below — review, then hit "Import all".');
-    };
-    r.readAsText(file);
-  };
-
   return (
-    <>
     <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
-      <div className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">
-        Bulk import — 50+ items in 1 click
-      </div>
-      <p className="mb-3 text-xs text-neutral-600">
-        One product per line, fields separated by <code className="text-gold">|</code>:
-        <br />
-        <code className="text-neutral-700">name | price | oldPrice | category | imageURL | stock | videoURL (optional)</code>
-        <br />
-        oldPrice and stock are optional. Lines starting with # are ignored.
-      </p>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        rows={10}
-        placeholder={'Golden Rose Gift Box | 2490 | 3490 | Gifts | https://picsum.photos/seed/rose/600/600 | 25\nBluetooth Earbuds Pro | 4990 | 6990 | Electronics | https://picsum.photos/seed/buds/600/600 | 40'}
-        className="w-full rounded-md bg-white p-3 font-mono text-xs text-neutral-800 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-600 focus:ring-gold"
-      />
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        <button onClick={doImport} className={btnGold}>⚡ Import all</button>
-        <label className={`${btnGhost} cursor-pointer`}>
-          📄 Load .csv file
-          <input type="file" accept=".csv,.txt" onChange={(e) => onCsv(e.target.files?.[0])} className="hidden" />
-        </label>
-        <span className="text-xs text-neutral-500">{db.products.length} products in store</span>
-      </div>
-      {msg && <div className="mt-3 text-sm text-green-400">{msg}</div>}
-    </div>
-
-    {/* ── Bulk from gallery ── */}
-    <div className="mt-4 rounded-lg bg-white p-5 ring-1 ring-neutral-200">
       <div className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">
         📷 Bulk from gallery — select many at once
       </div>
@@ -805,8 +712,8 @@ function BulkTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           </div>
         </>
       )}
+      {msg && <div className="mt-3 text-sm text-green-400">{msg}</div>}
     </div>
-    </>
   );
 }
 
@@ -923,10 +830,10 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             label={form.kind === 'percent' ? 'Percent value *' : 'Rupees value *'}
             hint={form.kind === 'percent' ? 'e.g. 20 = 20% off. 100 = full 100% off (free!).' : 'e.g. 500 = Rs. 500 off the total.'}
           >
-            <input type="number" value={form.value} onChange={(e) => set('value', Number(e.target.value))} placeholder={form.kind === 'percent' ? 'e.g. 20' : 'e.g. 500'} className={inputCls} />
+            <input type="number" value={form.value || ''} onChange={(e) => set('value', Number(e.target.value))} placeholder={form.kind === 'percent' ? 'e.g. 20' : 'e.g. 500'} className={inputCls} />
           </Field>
           <Field label="Minimum order (Rs.)" hint="Coupon works only if the cart total is at least this much. 0 = works on any order.">
-            <input type="number" value={form.minOrder} onChange={(e) => set('minOrder', Number(e.target.value))} placeholder="e.g. 1000" className={inputCls} />
+            <input type="number" value={form.minOrder || ''} onChange={(e) => set('minOrder', Number(e.target.value))} placeholder="e.g. 1000" className={inputCls} />
           </Field>
           <Field label="Expiry date *" hint="After this date the coupon stops working automatically.">
             <input type="date" value={form.expiry} onChange={(e) => set('expiry', e.target.value)} className={inputCls} />
@@ -1092,17 +999,6 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         <div className="flex gap-3">
           <input value={announcement} onChange={(e) => setAnnouncement(e.target.value)} placeholder="Banner text (empty = hidden)" className={inputCls} />
           <button onClick={saveAnnouncement} className={btnGold}>Save</button>
-        </div>
-      </div>
-
-      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
-        <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">AI support agent (Lova)</div>
-        <div className="text-xs leading-relaxed text-neutral-600">
-          The 💬 chat helper on the store answers customers in Tamil, English, Sinhala and more, using your products and prices.
-          <br /><br />
-          <b>Setup (one time):</b> get a free API key at <b>console.groq.com</b>, then in Vercel open this project →
-          <b> Settings → Environment Variables</b> → add <code className="text-gold">GROQ_API_KEY</code> = your key → <b>Redeploy</b>.
-          The key stays on the server — it is never shown to visitors.
         </div>
       </div>
 
