@@ -896,6 +896,19 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
 function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const [open, setOpen] = useState<string | null>(null);
+  const [showNew, setShowNew] = useState(false);
+
+  // ── New manual order form ──
+  const [cName, setCName] = useState('');
+  const [cPhone, setCPhone] = useState('');
+  const [cWhatsapp, setCWhatsapp] = useState('');
+  const [cAddress, setCAddress] = useState('');
+  const [cCity, setCCity] = useState('');
+  const [cPayId, setCPayId] = useState('cod');
+  const [cFee, setCFee] = useState('');
+  const [cItems, setCItems] = useState<{ productId: string; qty: number }[]>([]);
+  const [cPick, setCPick] = useState('');
+  const [cMsg, setCMsg] = useState('');
 
   const setStatus = (o: Order, status: Order['status']) =>
     persist({ ...db, orders: db.orders.map((x) => (x.id === o.id ? { ...x, status } : x)) });
@@ -905,11 +918,142 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
     persist({ ...db, orders: db.orders.filter((x) => x.id !== o.id) });
   };
 
-  if (db.orders.length === 0)
-    return <div className="rounded-lg bg-white p-8 text-center text-neutral-600 ring-1 ring-neutral-200">No orders yet.</div>;
+  const addItem = () => {
+    if (!cPick) return;
+    setCItems((items) => {
+      const found = items.find((i) => i.productId === cPick);
+      if (found) return items.map((i) => (i.productId === cPick ? { ...i, qty: i.qty + 1 } : i));
+      return [...items, { productId: cPick, qty: 1 }];
+    });
+    setCPick('');
+  };
+
+  const cSubtotal = cItems.reduce((s, i) => {
+    const p = db.products.find((x) => x.id === i.productId);
+    return s + (p ? p.price * i.qty : 0);
+  }, 0);
+  const cDeliveryFee = cFee.trim() === '' ? 0 : Number(cFee) || 0;
+
+  const createOrder = () => {
+    if (!cName.trim() || !cPhone.trim() || !cAddress.trim()) {
+      setCMsg('Fill customer name, phone and address.');
+      return;
+    }
+    if (cItems.length === 0) {
+      setCMsg('Add at least one product.');
+      return;
+    }
+    const order: Order = {
+      id: uid('ORD'),
+      customer: cName.trim(),
+      phone: cPhone.trim(),
+      whatsapp: cWhatsapp.trim() || undefined,
+      address: cAddress.trim(),
+      city: cCity.trim() || undefined,
+      items: cItems.map((i) => {
+        const p = db.products.find((x) => x.id === i.productId);
+        return { productId: i.productId, name: p?.name ?? i.productId, price: p?.price ?? 0, qty: i.qty };
+      }),
+      subtotal: cSubtotal,
+      discount: 0,
+      deliveryFee: cDeliveryFee,
+      total: cSubtotal + cDeliveryFee,
+      paymentMethod: db.paymentMethods.find((m) => m.id === cPayId)?.name ?? cPayId,
+      status: 'pending',
+      date: new Date().toISOString(),
+    };
+    persist({ ...db, orders: [order, ...db.orders] });
+    setCName(''); setCPhone(''); setCWhatsapp(''); setCAddress(''); setCCity('');
+    setCItems([]); setCFee(''); setCPayId('cod'); setCMsg('');
+    setShowNew(false);
+  };
 
   return (
     <div className="space-y-2">
+      <div className="flex justify-end">
+        <button onClick={() => setShowNew(!showNew)} className={btnGold}>
+          {showNew ? '✕ Close' : '＋ New Order'}
+        </button>
+      </div>
+
+      {showNew && (
+        <div className="rounded-lg bg-white p-5 ring-1 ring-gold/40">
+          <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">New manual order</div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Customer name *">
+              <input value={cName} onChange={(e) => setCName(e.target.value)} placeholder="e.g. Fathima" className={inputCls} />
+            </Field>
+            <Field label="Phone *">
+              <input value={cPhone} onChange={(e) => setCPhone(e.target.value)} placeholder="e.g. 0771234567" className={inputCls} />
+            </Field>
+            <Field label="WhatsApp number">
+              <input value={cWhatsapp} onChange={(e) => setCWhatsapp(e.target.value)} placeholder="e.g. 0771234567" className={inputCls} />
+            </Field>
+            <Field label="City">
+              <input value={cCity} onChange={(e) => setCCity(e.target.value)} placeholder="e.g. Akkaraipattu" className={inputCls} />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field label="Delivery address *">
+                <input value={cAddress} onChange={(e) => setCAddress(e.target.value)} placeholder="Street, house no." className={inputCls} />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field label="Products *" hint="Pick a product, tap Add, repeat for more items.">
+                <div className="flex gap-2">
+                  <select value={cPick} onChange={(e) => setCPick(e.target.value)} className={inputCls} aria-label="Pick product">
+                    <option value="">— Select product —</option>
+                    {db.products.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name} — {money(p.price)}</option>
+                    ))}
+                  </select>
+                  <button onClick={addItem} className={btnGold}>Add</button>
+                </div>
+              </Field>
+              {cItems.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {cItems.map((i) => {
+                    const p = db.products.find((x) => x.id === i.productId);
+                    return (
+                      <div key={i.productId} className="flex items-center justify-between rounded bg-neutral-50 px-3 py-1.5 text-sm ring-1 ring-neutral-200">
+                        <span className="text-neutral-800">{p?.name}</span>
+                        <span className="flex items-center gap-2">
+                          <button onClick={() => setCItems((items) => items.map((x) => (x.productId === i.productId ? { ...x, qty: Math.max(1, x.qty - 1) } : x)))} className="px-2 font-bold text-neutral-500">−</button>
+                          <span className="tabular-nums">{i.qty}</span>
+                          <button onClick={() => setCItems((items) => items.map((x) => (x.productId === i.productId ? { ...x, qty: x.qty + 1 } : x)))} className="px-2 font-bold text-neutral-500">+</button>
+                          <button onClick={() => setCItems((items) => items.filter((x) => x.productId !== i.productId))} className="text-xs text-red-400">✕</button>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            <Field label="Delivery fee (Rs.)" hint="Leave empty or 0 for free delivery.">
+              <input type="number" value={cFee} onChange={(e) => setCFee(e.target.value)} placeholder="e.g. 350" className={inputCls} />
+            </Field>
+            <Field label="Payment method">
+              <select value={cPayId} onChange={(e) => setCPayId(e.target.value)} className={inputCls} aria-label="Payment method">
+                {db.paymentMethods.map((m) => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
+            </Field>
+          </div>
+          <div className="mt-3 rounded-md bg-neutral-50 p-3 text-sm ring-1 ring-neutral-200">
+            <div className="flex justify-between text-neutral-700"><span>Subtotal</span><span className="tabular-nums">{money(cSubtotal)}</span></div>
+            <div className="flex justify-between text-neutral-700"><span>Delivery</span><span className="tabular-nums">{cDeliveryFee > 0 ? money(cDeliveryFee) : 'FREE'}</span></div>
+            <div className="flex justify-between pt-1 text-base font-bold"><span>Total</span><span className="text-gold tabular-nums">{money(cSubtotal + cDeliveryFee)}</span></div>
+          </div>
+          <div className="mt-3">
+            <button onClick={createOrder} className={btnGold}>Create Order</button>
+          </div>
+          {cMsg && <div className="mt-2 text-xs font-medium text-red-400">{cMsg}</div>}
+        </div>
+      )}
+
+      {db.orders.length === 0 && !showNew && (
+        <div className="rounded-lg bg-white p-8 text-center text-neutral-600 ring-1 ring-neutral-200">No orders yet.</div>
+      )}
       {db.orders.map((o) => (
         <div key={o.id} className="rounded-lg bg-white p-4 ring-1 ring-neutral-200">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -932,13 +1076,19 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           </div>
           {open === o.id && (
             <div className="mt-3 border-t border-neutral-200 pt-3 text-sm text-neutral-700">
-              <div className="mb-2">📍 {o.address}</div>
+              <div className="mb-1">📍 {o.address}{o.city ? `, ${o.city}` : ''}</div>
+              {o.whatsapp && <div className="mb-1">💬 WhatsApp: {o.whatsapp}</div>}
               {o.coupon && <div className="mb-2 text-green-400">Coupon: {o.coupon} (−{money(o.discount)})</div>}
               <ul className="space-y-1">
                 {o.items.map((i, idx) => (
                   <li key={idx}>• {i.name} × {i.qty} — {money(i.price * i.qty)}</li>
                 ))}
               </ul>
+              <div className="mt-2 space-y-0.5 border-t border-neutral-200 pt-2">
+                <div className="flex justify-between"><span>Subtotal</span><span className="tabular-nums">{money(o.subtotal)}</span></div>
+                {(o.deliveryFee ?? 0) > 0 && <div className="flex justify-between"><span>Delivery</span><span className="tabular-nums">{money(o.deliveryFee ?? 0)}</span></div>}
+                <div className="flex justify-between font-bold"><span>Total</span><span className="text-gold tabular-nums">{money(o.total)}</span></div>
+              </div>
             </div>
           )}
         </div>

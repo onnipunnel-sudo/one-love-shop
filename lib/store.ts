@@ -45,10 +45,13 @@ export interface Order {
   id: string;
   customer: string;
   phone: string;
+  whatsapp?: string;
   address: string;
+  city?: string;
   items: OrderItem[];
   subtotal: number;
   discount: number;
+  deliveryFee: number;
   total: number;
   paymentMethod: string;
   coupon?: string;
@@ -212,3 +215,9 @@ export const SHOP_PHONE = '075-1346314';
 export const SHOP_WHATSAPP = '94751346314'; // wa.me needs country code, no +
 export const SHOP_CITY = 'Akkaraipattu';
 export const SHOP_EMAIL = 'rusaikahamed86@gmail.com';
+
+// Delivery fees (matches Merchant Center shipping policy)
+export const DELIVERY_FEE = 350; // Rs. flat islandwide
+export const FREE_DELIVERY_MIN = 5000; // free delivery above this subtotal
+export const deliveryFeeFor = (subtotal: number): number =>
+  subtotal >= FREE_DELIVERY_MIN ? 0 : DELIVERY_FEE;

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useMemo, useState } from 'react';
 import { useCart } from '@/lib/cart';
 import { validateCoupon } from '@/lib/coupon';
-import { Order, SHOP_WHATSAPP, loadDb, money, saveDb, uid } from '@/lib/store';
+import { Order, SHOP_WHATSAPP, deliveryFeeFor, loadDb, money, saveDb, uid } from '@/lib/store';
 
 function CheckoutInner() {
   const params = useSearchParams();
@@ -16,7 +16,9 @@ function CheckoutInner() {
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
   const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
   const [payId, setPayId] = useState('cod');
   const [placed, setPlaced] = useState<Order | null>(null);
   const [error, setError] = useState('');
@@ -26,11 +28,12 @@ function CheckoutInner() {
   const couponCode = params.get('coupon') || '';
   const couponRes = couponCode ? validateCoupon(db, couponCode, subtotal) : null;
   const discount = couponRes?.ok ? couponRes.discount : 0;
-  const total = Math.max(0, subtotal - discount);
+  const deliveryFee = deliveryFeeFor(subtotal - discount);
+  const total = Math.max(0, subtotal - discount + deliveryFee);
 
   const placeOrder = () => {
-    if (!name.trim() || !phone.trim() || !address.trim()) {
-      setError('Please fill in your name, phone and address.');
+    if (!name.trim() || !phone.trim() || !address.trim() || !city.trim()) {
+      setError('Please fill in your name, phone, address and city.');
       return;
     }
     if (lines.length === 0) {
@@ -42,13 +45,16 @@ function CheckoutInner() {
       id: uid('ORD'),
       customer: name.trim(),
       phone: phone.trim(),
+      whatsapp: whatsapp.trim() || undefined,
       address: address.trim(),
+      city: city.trim(),
       items: lines.map((l) => {
         const p = products.get(l.productId);
         return { productId: l.productId, name: p?.name ?? l.productId, price: p?.price ?? 0, qty: l.qty };
       }),
       subtotal,
       discount,
+      deliveryFee,
       total,
       paymentMethod: db.paymentMethods.find((m) => m.id === payId)?.name ?? payId,
       coupon: couponRes?.ok ? couponCode : undefined,
@@ -64,10 +70,13 @@ function CheckoutInner() {
 
   const waText = placed
     ? encodeURIComponent(
-        `*NEW ORDER — ONE LOVE* 🛍️\nOrder: ${placed.id}\nName: ${placed.customer}\nPhone: ${placed.phone}\nAddress: ${placed.address}\n\n` +
+        `*NEW ORDER — ONE LOVE* 🛍️\nOrder: ${placed.id}\nName: ${placed.customer}\nPhone: ${placed.phone}\n` +
+          (placed.whatsapp ? `WhatsApp: ${placed.whatsapp}\n` : '') +
+          `Address: ${placed.address}${placed.city ? ', ' + placed.city : ''}\n\n` +
           placed.items.map((i) => `• ${i.name} × ${i.qty} — ${money(i.price * i.qty)}`).join('\n') +
           `\n\nSubtotal: ${money(placed.subtotal)}` +
           (placed.discount ? `\nDiscount: − ${money(placed.discount)}` : '') +
+          (placed.deliveryFee ? `\nDelivery: ${money(placed.deliveryFee)}` : '\nDelivery: FREE') +
           `\n*Total: ${money(placed.total)}*\nPayment: ${placed.paymentMethod}`,
       )
     : '';
@@ -129,15 +138,19 @@ function CheckoutInner() {
               Delivery Details
             </div>
             <div className="space-y-3">
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" className={inputCls} />
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone / WhatsApp number" className={inputCls} />
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name *" className={inputCls} />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone number *" className={inputCls} />
+                <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="WhatsApp number" className={inputCls} />
+              </div>
               <textarea
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="Delivery address (street, city)"
-                rows={3}
+                placeholder="Delivery address * (street, house no.)"
+                rows={2}
                 className="w-full rounded-md bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold"
               />
+              <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" className={inputCls} />
             </div>
           </section>
 
@@ -200,6 +213,13 @@ function CheckoutInner() {
                 <span>Coupon ({couponCode})</span>
                 <span className="tabular-nums">− {money(discount)}</span>
               </div>
+            )}
+            <div className="flex justify-between text-neutral-700">
+              <span>Delivery</span>
+              <span className="tabular-nums">{deliveryFee > 0 ? money(deliveryFee) : <b className="text-green-400">FREE</b>}</span>
+            </div>
+            {deliveryFee === 0 && (
+              <div className="text-[11px] text-neutral-500">🎉 Free islandwide delivery on orders over Rs. 5,000</div>
             )}
             <div className="flex justify-between pt-2 text-base font-bold">
               <span>Total</span>
