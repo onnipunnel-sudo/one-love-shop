@@ -36,7 +36,7 @@ export function Footer() {
           <ul className="space-y-1 text-sm text-neutral-600">
             <li>Help Center</li>
             <li>Track Your Order</li>
-            <li>Returns & Refunds</li>
+            <li><Link href="/returns/" className="hover:text-gold">Returns & Refunds</Link></li>
             <li>Privacy Policy</li>
           </ul>
         </div>
