@@ -7,7 +7,7 @@ import { WhatsAppFloat } from '@/components/WhatsAppFloat';
 import { SupportChat } from '@/components/SupportChat';
 import './globals.css';
 
-const SITE_URL = 'https://one-love.vercel.app';
+const SITE_URL = 'https://one-love-shop.vercel.app';
 const SITE_NAME = 'ONE LOVE';
 const DEFAULT_TITLE = 'ONE LOVE — Luxury Gifts & Lifestyle | Sri Lanka';
 const DEFAULT_DESC =
