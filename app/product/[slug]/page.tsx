@@ -11,7 +11,7 @@ import { WishlistHeart } from '@/components/WishlistHeart';
 import { ShareButton } from '@/components/ShareButton';
 import { loadDb, money, productSlug, findBySlug, SHOP_CITY } from '@/lib/store';
 
-const SITE_URL = 'https://one-love-shop.vercel.app';
+const SITE_URL = 'https://one-love.vercel.app';
 
 function discountPct(price: number, oldPrice?: number): number | null {
   if (oldPrice && oldPrice > price) return Math.round((1 - price / oldPrice) * 100);

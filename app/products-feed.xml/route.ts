@@ -1,10 +1,10 @@
 import { loadDb, productSlug, money } from '@/lib/store';
 
-const SITE_URL = 'https://one-love-shop.vercel.app';
+const SITE_URL = 'https://one-love.vercel.app';
 
 // Google Merchant Center product feed (RSS 2.0 + Google namespace).
 // Kayer: upload this URL in Merchant Center > Products > Feeds:
-//   https://one-love-shop.vercel.app/products-feed.xml
+//   https://one-love.vercel.app/products-feed.xml
 export async function GET() {
   const db = loadDb();
   const items = db.products

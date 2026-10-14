@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { loadDb, productSlug } from '@/lib/store';
 
-const SITE_URL = 'https://one-love-shop.vercel.app';
+const SITE_URL = 'https://one-love.vercel.app';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const db = loadDb(); // seed products (server-side at build)
