@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
+  Banner,
   Coupon,
   Db,
   Order,
@@ -88,7 +89,7 @@ function downscaleImageFile(file: File): Promise<string> {
   });
 }
 
-const TABS = ['Products', 'Promos', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
+const TABS = ['Products', 'Promos', 'Banners', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
 
 const inputCls =
   'h-10 w-full rounded-md bg-ink-card px-3 text-sm text-neutral-100 outline-none ring-1 ring-royal/30 placeholder:text-neutral-500 focus:ring-gold';
@@ -191,6 +192,7 @@ export default function AdminPage() {
 
       {tab === 'Products' && <ProductsTab db={db} persist={persist} />}
       {tab === 'Promos' && <PromosTab db={db} persist={persist} />}
+      {tab === 'Banners' && <BannersTab db={db} persist={persist} />}
       {tab === 'Bulk Import' && <BulkTab db={db} persist={persist} />}
       {tab === 'Payments' && <PaymentsTab db={db} persist={persist} />}
       {tab === 'Coupons' && <CouponsTab db={db} persist={persist} />}
@@ -502,6 +504,93 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+/* ───────────────────────── Banners ───────────────────────── */
+
+const emptyBanner: Banner = { id: '', title: '', sub: '', cta: 'Shop Now', link: '/', active: true };
+
+function BannersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
+  const [form, setForm] = useState<Banner>(emptyBanner);
+  const [editing, setEditing] = useState<Banner | null>(null);
+  const [msg, setMsg] = useState('');
+  const set = (k: keyof Banner, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
+
+  const save = () => {
+    if (!form.title.trim()) { setMsg('Banner title is required.'); return; }
+    const banner: Banner = { ...form, id: editing ? editing.id : uid('banner') };
+    const banners = editing
+      ? db.banners.map((b) => (b.id === editing.id ? banner : b))
+      : [...db.banners, banner];
+    persist({ ...db, banners });
+    setMsg(editing ? 'Banner updated.' : 'Banner added.');
+    setForm(emptyBanner);
+    setEditing(null);
+  };
+
+  const del = (id: string) => {
+    if (!confirm('Delete this banner?')) return;
+    persist({ ...db, banners: db.banners.filter((b) => b.id !== id) });
+  };
+
+  const toggle = (b: Banner) => {
+    persist({ ...db, banners: db.banners.map((x) => (x.id === b.id ? { ...x, active: !x.active } : x)) });
+  };
+
+  const move = (id: string, dir: -1 | 1) => {
+    const arr = [...db.banners];
+    const i = arr.findIndex((b) => b.id === id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= arr.length) return;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    persist({ ...db, banners: arr });
+  };
+
+  const edit = (b: Banner) => { setForm({ ...b }); setEditing(b); setMsg(''); };
+
+  return (
+    <div>
+      <div className="mb-4 rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
+        <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">
+          {editing ? 'Edit banner' : 'New banner'}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input value={form.title} onChange={(e) => set('title', e.target.value)} placeholder="Banner title (e.g. Diwali Mega Sale)" className={`${inputCls} sm:col-span-2`} />
+          <input value={form.sub} onChange={(e) => set('sub', e.target.value)} placeholder="Subtitle (e.g. Up to 50% off)" className={`${inputCls} sm:col-span-2`} />
+          <input value={form.cta} onChange={(e) => set('cta', e.target.value)} placeholder="Button text (e.g. Shop Now)" className={inputCls} />
+          <input value={form.link} onChange={(e) => set('link', e.target.value)} placeholder="Button link (e.g. /?cat=Gifts)" className={inputCls} />
+          <label className="flex items-center gap-2 text-sm text-neutral-300 sm:col-span-2">
+            <input type="checkbox" checked={form.active} onChange={(e) => set('active', e.target.checked)} className="h-4 w-4 accent-purple-600" />
+            Active (show on home page)
+          </label>
+        </div>
+        <div className="mt-4 flex gap-2">
+          <button onClick={save} className={btnGold}>{editing ? 'Update Banner' : 'Add Banner'}</button>
+          {editing && <button onClick={() => { setForm(emptyBanner); setEditing(null); }} className={btnGhost}>Cancel</button>}
+        </div>
+        {msg && <div className="mt-2 text-sm text-gold">{msg}</div>}
+      </div>
+
+      <div className="space-y-2">
+        {db.banners.map((b, i) => (
+          <div key={b.id} className={`flex items-center gap-3 rounded-lg p-3 ring-1 ${b.active ? 'bg-ink-card ring-royal/20' : 'bg-ink-soft ring-neutral-700 opacity-60'}`}>
+            <div className="flex flex-col gap-1">
+              <button onClick={() => move(b.id, -1)} disabled={i === 0} className="text-neutral-400 hover:text-gold disabled:opacity-30">▲</button>
+              <button onClick={() => move(b.id, 1)} disabled={i === db.banners.length - 1} className="text-neutral-400 hover:text-gold disabled:opacity-30">▼</button>
+            </div>
+            <div className="flex-1">
+              <div className="font-bold text-gold">{b.title}</div>
+              <div className="text-xs text-neutral-400">{b.sub} → {b.cta} ({b.link})</div>
+            </div>
+            <button onClick={() => toggle(b)} className={btnGhost}>{b.active ? 'Hide' : 'Show'}</button>
+            <button onClick={() => edit(b)} className={btnGhost}>Edit</button>
+            <button onClick={() => del(b.id)} className="rounded-md px-3 py-1.5 text-xs text-red-400 ring-1 ring-red-900 hover:ring-red-500">Delete</button>
+          </div>
+        ))}
+        {db.banners.length === 0 && <div className="text-sm text-neutral-500">No banners yet. Add one above!</div>}
       </div>
     </div>
   );

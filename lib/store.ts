@@ -19,6 +19,15 @@ export interface Product {
   rating: number; // 0..5 decorative
 }
 
+export interface Banner {
+  id: string;
+  title: string;
+  sub: string;
+  cta: string;
+  link: string; // where the CTA button goes, e.g. "/?cat=Gifts"
+  active: boolean;
+}
+
 export interface Coupon {
   code: string;
   kind: 'percent' | 'flat';
@@ -81,6 +90,7 @@ export interface Settings {
 export interface Db {
   products: Product[];
   promos: Promo[];
+  banners: Banner[];
   coupons: Coupon[];
   paymentMethods: PaymentMethod[];
   orders: Order[];
@@ -132,6 +142,11 @@ function seedDb(): Db {
     promos: [
       { id: 'promo1', title: 'Ferrero Rocher & Blue Rose Bouquet — Special Offer', image: '/products/ferrero-bouquet.jpg', price: 3490, oldPrice: 4490, offer: 'Festival Special −22%', description: 'Luxury Ferrero Rocher bouquet in blue satin roses — now at a special festival price. Limited stock!', date: new Date().toISOString() },
       { id: 'promo2', title: 'RC Racing Car — Flash Deal', image: pic('onelove-rccar'), price: 5990, oldPrice: 7990, offer: 'Flash Deal −25%', description: 'High-speed remote control racing car. Grab it before the flash sale ends!', date: new Date().toISOString() },
+    ],
+    banners: [
+      { id: 'b1', title: 'ONE LOVE Mega Sale', sub: 'Up to 40% off luxury gifts & more', cta: 'Shop Flash Sale', link: '/?flash=1', active: true },
+      { id: 'b2', title: 'Gifts That Say It All', sub: 'Golden gift boxes, hampers & keepsakes', cta: 'Explore Gifts', link: '/?cat=Gifts', active: true },
+      { id: 'b3', title: 'New Electronics Arrivals', sub: 'Earbuds, speakers & smart gadgets', cta: 'Shop Electronics', link: '/?cat=Electronics', active: true },
     ],
     coupons: [
       { code: 'WELCOME10', kind: 'percent', value: 10, minOrder: 0, expiry: '2027-12-31', active: true },
