@@ -18,18 +18,87 @@ function HomeInner() {
   const cat = params.get('cat') || '';
   // Load once per render — picks up admin edits on navigation.
   const [db] = useState(loadDb);
+  const [sort, setSort] = useState('featured');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+
+  const applyFilters = (list: typeof db.products) => {
+    const min = minPrice ? Number(minPrice) : 0;
+    const max = maxPrice ? Number(maxPrice) : Infinity;
+    const out = list.filter((p) => p.price >= min && p.price <= max);
+    switch (sort) {
+      case 'price-asc':
+        return [...out].sort((a, b) => a.price - b.price);
+      case 'price-desc':
+        return [...out].sort((a, b) => b.price - a.price);
+      case 'rating':
+        return [...out].sort((a, b) => b.rating - a.rating);
+      case 'discount': {
+        const disc = (p: (typeof out)[number]) =>
+          p.oldPrice && p.oldPrice > p.price ? (p.oldPrice - p.price) / p.oldPrice : 0;
+        return [...out].sort((a, b) => disc(b) - disc(a));
+      }
+      default:
+        return out;
+    }
+  };
 
   const filtered = useMemo(() => {
-    return db.products.filter((p) => {
+    const list = db.products.filter((p) => {
       if (cat && p.category !== cat && p.category !== 'All') return false;
       if (q && !(p.name + ' ' + p.description + ' ' + p.category).toLowerCase().includes(q))
         return false;
       return true;
     });
-  }, [db, q, cat]);
+    return applyFilters(list);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [db, q, cat, sort, minPrice, maxPrice]);
+
+  const justForYou = useMemo(() => applyFilters(db.products), [db, sort, minPrice, maxPrice]);
 
   const flash = db.products.filter((p) => p.flashSale);
   const browsing = q || cat;
+
+  const filterBar = (
+    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-ink-card p-3 ring-1 ring-royal/20">
+      <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">🔍 Filter:</span>
+      <input
+        type="number"
+        value={minPrice}
+        onChange={(e) => setMinPrice(e.target.value)}
+        placeholder="Min Rs."
+        className="h-9 w-28 rounded-md bg-ink-soft px-2 text-sm text-neutral-100 outline-none ring-1 ring-royal/30 placeholder:text-neutral-500 focus:ring-gold"
+      />
+      <span className="text-neutral-500">–</span>
+      <input
+        type="number"
+        value={maxPrice}
+        onChange={(e) => setMaxPrice(e.target.value)}
+        placeholder="Max Rs."
+        className="h-9 w-28 rounded-md bg-ink-soft px-2 text-sm text-neutral-100 outline-none ring-1 ring-royal/30 placeholder:text-neutral-500 focus:ring-gold"
+      />
+      <select
+        value={sort}
+        onChange={(e) => setSort(e.target.value)}
+        className="h-9 rounded-md bg-ink-soft px-2 text-sm text-neutral-100 outline-none ring-1 ring-royal/30 focus:ring-gold"
+        aria-label="Sort products"
+      >
+        <option value="featured">✨ Featured</option>
+        <option value="price-asc">💰 Price: Low → High</option>
+        <option value="price-desc">💰 Price: High → Low</option>
+        <option value="rating">⭐ Top Rated</option>
+        <option value="discount">🏷️ Biggest Discount</option>
+      </select>
+      {(minPrice || maxPrice || sort !== 'featured') && (
+        <button
+          onClick={() => { setMinPrice(''); setMaxPrice(''); setSort('featured'); }}
+          className="text-xs text-neutral-400 underline hover:text-gold"
+        >
+          Clear
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <div className="py-4">
@@ -79,8 +148,9 @@ function HomeInner() {
             {cat ? `${cat}` : `Results for "${params.get('q')}"`}{' '}
             <span className="text-sm font-normal text-neutral-400">({filtered.length} items)</span>
           </h2>
+          {filterBar}
           {filtered.length === 0 ? (
-            <p className="text-neutral-400">No products found. Try another search.</p>
+            <p className="text-neutral-400">No products found. Try another search or clear filters.</p>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {filtered.map((p) => (
@@ -109,8 +179,9 @@ function HomeInner() {
           {/* ── Just For You (Daraz signature grid) ── */}
           <section className="mt-8">
             <h2 className="mb-4 text-xl font-bold text-gold">✨ Just For You</h2>
+            {filterBar}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {db.products.map((p) => (
+              {justForYou.map((p) => (
                 <ProductCard key={p.id} p={p} />
               ))}
             </div>

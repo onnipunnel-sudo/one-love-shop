@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AddToCart } from './AddToCart';
 import { ProductCard } from '@/components/ProductCard';
+import { ProductReviews } from '@/components/ProductReviews';
+import { WishlistHeart } from '@/components/WishlistHeart';
 import { loadDb, money, productSlug, findBySlug, SHOP_CITY } from '@/lib/store';
 
 const SITE_URL = 'https://one-love-shop.vercel.app';
@@ -126,7 +128,10 @@ export default function ProductSlugPage({ params }: { params: { slug: string } }
           <div className="text-xs uppercase tracking-wider text-neutral-500">
             {product.category}
           </div>
-          <h1 className="mt-1 text-2xl font-bold text-neutral-900">{product.name}</h1>
+          <div className="mt-1 flex items-start justify-between gap-3">
+            <h1 className="text-2xl font-bold text-neutral-900">{product.name}</h1>
+            <WishlistHeart productId={product.id} big />
+          </div>
           <div className="mt-2">
             <Stars rating={product.rating} />{' '}
             <span className="text-xs text-neutral-500">{product.rating.toFixed(1)} / 5</span>
@@ -170,6 +175,8 @@ export default function ProductSlugPage({ params }: { params: { slug: string } }
           </div>
         </section>
       )}
+
+      <ProductReviews productId={product.id} />
     </div>
   );
 }

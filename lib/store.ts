@@ -19,6 +19,16 @@ export interface Product {
   rating: number; // 0..5 decorative
 }
 
+export interface Review {
+  id: string;
+  productId: string;
+  name: string;
+  rating: number; // 1..5
+  text: string;
+  date: string; // ISO
+  approved: boolean;
+}
+
 export interface Banner {
   id: string;
   title: string;
@@ -61,10 +71,12 @@ export interface Order {
   subtotal: number;
   discount: number;
   deliveryFee: number;
+  giftWrapFee: number;
+  giftMessage?: string;
   total: number;
   paymentMethod: string;
   coupon?: string;
-  status: 'pending' | 'completed';
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'completed' | 'cancelled';
   date: string; // ISO
 }
 
@@ -91,6 +103,7 @@ export interface Db {
   products: Product[];
   promos: Promo[];
   banners: Banner[];
+  reviews: Review[];
   coupons: Coupon[];
   paymentMethods: PaymentMethod[];
   orders: Order[];
@@ -151,6 +164,11 @@ function seedDb(): Db {
     coupons: [
       { code: 'WELCOME10', kind: 'percent', value: 10, minOrder: 0, expiry: '2027-12-31', active: true },
       { code: 'LOVE50', kind: 'flat', value: 50, minOrder: 1000, expiry: '2027-12-31', active: true },
+    ],
+    reviews: [
+      { id: 'r1', productId: 'p1', name: 'Fathima', rating: 5, text: 'My wife loved it! The scrolls are so sweet and the jar looks beautiful on our shelf.', date: new Date(Date.now() - 5 * 86400000).toISOString(), approved: true },
+      { id: 'r2', productId: 'p1', name: 'Rizwan', rating: 4, text: 'Nice gift for anniversary. Delivery was quick.', date: new Date(Date.now() - 12 * 86400000).toISOString(), approved: true },
+      { id: 'r3', productId: 'p4', name: 'Ayesha', rating: 5, text: 'The bouquet is even more gorgeous in real life. Chocolates were fresh!', date: new Date(Date.now() - 3 * 86400000).toISOString(), approved: true },
     ],
     paymentMethods: [
       { id: 'cod', name: 'Cash on Delivery', details: 'Pay in cash when your order arrives.' },

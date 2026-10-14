@@ -13,6 +13,7 @@ import {
   PaymentMethod,
   Product,
   Promo,
+  Review,
   hashPassword,
   loadDb,
   money,
@@ -89,7 +90,7 @@ function downscaleImageFile(file: File): Promise<string> {
   });
 }
 
-const TABS = ['Products', 'Promos', 'Banners', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
+const TABS = ['Products', 'Promos', 'Banners', 'Reviews', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
 
 const inputCls =
   'h-10 w-full rounded-md bg-ink-card px-3 text-sm text-neutral-100 outline-none ring-1 ring-royal/30 placeholder:text-neutral-500 focus:ring-gold';
@@ -193,6 +194,7 @@ export default function AdminPage() {
       {tab === 'Products' && <ProductsTab db={db} persist={persist} />}
       {tab === 'Promos' && <PromosTab db={db} persist={persist} />}
       {tab === 'Banners' && <BannersTab db={db} persist={persist} />}
+      {tab === 'Reviews' && <ReviewsTab db={db} persist={persist} />}
       {tab === 'Bulk Import' && <BulkTab db={db} persist={persist} />}
       {tab === 'Payments' && <PaymentsTab db={db} persist={persist} />}
       {tab === 'Coupons' && <CouponsTab db={db} persist={persist} />}
@@ -591,6 +593,69 @@ function BannersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           </div>
         ))}
         {db.banners.length === 0 && <div className="text-sm text-neutral-500">No banners yet. Add one above!</div>}
+      </div>
+    </div>
+  );
+}
+
+/* ───────────────────────── Reviews ───────────────────────── */
+
+function ReviewsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
+  const reviews = db.reviews || [];
+  const pending = reviews.filter((r) => !r.approved);
+  const approved = reviews.filter((r) => r.approved);
+
+  const productName = (id: string) =>
+    db.products.find((p) => p.id === id)?.name ?? id;
+
+  const approve = (r: Review) =>
+    persist({ ...db, reviews: reviews.map((x) => (x.id === r.id ? { ...x, approved: true } : x)) });
+
+  const del = (r: Review) => {
+    if (!confirm('Delete this review?')) return;
+    persist({ ...db, reviews: reviews.filter((x) => x.id !== r.id) });
+  };
+
+  const card = (r: Review) => (
+    <div key={r.id} className={`rounded-lg p-4 ring-1 ${r.approved ? 'bg-ink-card ring-royal/20' : 'bg-ink-card ring-gold/50'}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <span className="font-semibold text-gold">{r.name}</span>
+          <span className="ml-2 text-gold">{'★'.repeat(r.rating)}<span className="text-neutral-600">{'★'.repeat(5 - r.rating)}</span></span>
+          <div className="text-xs text-neutral-400">
+            {productName(r.productId)} · {new Date(r.date).toLocaleString()}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {!r.approved && <button onClick={() => approve(r)} className={btnGold}>✓ Approve</button>}
+          <button onClick={() => del(r)} className="rounded-md px-3 py-1.5 text-xs text-red-400 ring-1 ring-red-900 hover:ring-red-500">Delete</button>
+        </div>
+      </div>
+      <p className="mt-2 text-sm text-neutral-300">{r.text}</p>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">
+          ⏳ Pending approval ({pending.length})
+        </div>
+        {pending.length === 0 ? (
+          <p className="text-sm text-neutral-500">Nothing waiting for approval.</p>
+        ) : (
+          <div className="space-y-2">{pending.map(card)}</div>
+        )}
+      </div>
+      <div>
+        <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">
+          ✅ Published ({approved.length})
+        </div>
+        {approved.length === 0 ? (
+          <p className="text-sm text-neutral-500">No published reviews yet.</p>
+        ) : (
+          <div className="space-y-2">{approved.map(card)}</div>
+        )}
       </div>
     </div>
   );
@@ -1048,6 +1113,7 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       deliveryFee: cDeliveryFee,
       total: cSubtotal + cDeliveryFee,
       paymentMethod: db.paymentMethods.find((m) => m.id === cPayId)?.name ?? cPayId,
+      giftWrapFee: 0,
       status: 'pending',
       date: new Date().toISOString(),
     };
@@ -1157,9 +1223,19 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             <div className="flex items-center gap-2">
               <span className="font-bold text-gold">{money(o.total)}</span>
               <button onClick={() => setOpen(open === o.id ? null : o.id)} className={btnGhost}>Details</button>
-              {o.status === 'pending' && (
-                <button onClick={() => setStatus(o, 'completed')} className={btnGhost}>✓ Complete</button>
-              )}
+              <select
+                value={o.status}
+                onChange={(e) => setStatus(o, e.target.value as Order['status'])}
+                className="h-8 rounded-md bg-ink-card px-2 text-xs text-neutral-100 outline-none ring-1 ring-royal/30 focus:ring-gold"
+                aria-label="Order status"
+              >
+                <option value="pending">📝 Pending</option>
+                <option value="confirmed">✅ Confirmed</option>
+                <option value="shipped">🚚 Shipped</option>
+                <option value="delivered">📦 Delivered</option>
+                <option value="completed">🎉 Completed</option>
+                <option value="cancelled">❌ Cancelled</option>
+              </select>
               <button onClick={() => del(o)} className={btnGhost}>Delete</button>
             </div>
           </div>
@@ -1168,6 +1244,9 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
               <div className="mb-1">📍 {o.address}{o.city ? `, ${o.city}` : ''}</div>
               {o.whatsapp && <div className="mb-1">💬 WhatsApp: {o.whatsapp}</div>}
               {o.coupon && <div className="mb-2 text-green-400">Coupon: {o.coupon} (−{money(o.discount)})</div>}
+              {(o.giftWrapFee ?? 0) > 0 && (
+                <div className="mb-2 text-gold">🎁 Gift wrapped (+{money(o.giftWrapFee)}){o.giftMessage ? ` — "${o.giftMessage}"` : ''}</div>
+              )}
               <ul className="space-y-1">
                 {o.items.map((i, idx) => (
                   <li key={idx}>• {i.name} × {i.qty} — {money(i.price * i.qty)}</li>

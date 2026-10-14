@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { Product, money, productSlug } from '@/lib/store';
+import { WishlistHeart } from './WishlistHeart';
 
 export function Stars({ rating }: { rating: number }) {
   const full = Math.round(rating);
@@ -43,6 +44,9 @@ export function ProductCard({ p }: { p: Product }) {
             FLASH
           </span>
         )}
+        <div className="absolute bottom-2 right-2">
+          <WishlistHeart productId={p.id} />
+        </div>
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
         <div className="line-clamp-2 text-sm text-neutral-200">{p.name}</div>

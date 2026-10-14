@@ -6,9 +6,20 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useCart } from '@/lib/cart';
+import { useWishlist } from '@/lib/wishlist';
 import { SHOP_PHONE } from '@/lib/store';
 
 export const CATEGORIES = ['Girls', 'Boys', 'Gifts', 'Electronics', 'Fashion', 'Home'];
+
+function WishlistBadge() {
+  const { count } = useWishlist();
+  if (count === 0) return null;
+  return (
+    <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gold px-1 text-[11px] font-bold text-black">
+      {count}
+    </span>
+  );
+}
 
 export function Header() {
   const { count } = useCart();
@@ -57,6 +68,10 @@ export function Header() {
             </button>
           </form>
 
+          <Link href="/wishlist" className="relative shrink-0 p-2 text-2xl" aria-label="Wishlist">
+            🤍
+            <WishlistBadge />
+          </Link>
           <Link href="/cart" className="relative shrink-0 p-2 text-2xl" aria-label="Cart">
             🛒
             {count > 0 && (

@@ -36,7 +36,7 @@ export function Footer() {
           <div className="mb-3 font-semibold text-gold">Customer Care</div>
           <ul className="space-y-1 text-sm text-neutral-400">
             <li>Help Center</li>
-            <li>Track Your Order</li>
+            <li><Link href="/track" className="hover:text-gold">📦 Track Your Order</Link></li>
             <li><Link href="/returns/" className="hover:text-gold">Returns & Refunds</Link></li>
             <li>Privacy Policy</li>
             <li><Link href="/admin" className="text-neutral-600 hover:text-royal-light">🔐 Admin Login</Link></li>

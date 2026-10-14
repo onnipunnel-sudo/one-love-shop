@@ -20,6 +20,8 @@ function CheckoutInner() {
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [payId, setPayId] = useState('cod');
+  const [giftWrap, setGiftWrap] = useState(false);
+  const [giftMessage, setGiftMessage] = useState('');
   const [placed, setPlaced] = useState<Order | null>(null);
   const [error, setError] = useState('');
 
@@ -28,8 +30,10 @@ function CheckoutInner() {
   const couponCode = params.get('coupon') || '';
   const couponRes = couponCode ? validateCoupon(db, couponCode, subtotal) : null;
   const discount = couponRes?.ok ? couponRes.discount : 0;
+  const GIFT_WRAP_FEE = 250;
+  const giftWrapFee = giftWrap ? GIFT_WRAP_FEE : 0;
   const deliveryFee = deliveryFeeFor(subtotal - discount);
-  const total = Math.max(0, subtotal - discount + deliveryFee);
+  const total = Math.max(0, subtotal - discount + deliveryFee + giftWrapFee);
 
   const placeOrder = () => {
     if (!name.trim() || !phone.trim() || !address.trim() || !city.trim()) {
@@ -55,6 +59,8 @@ function CheckoutInner() {
       subtotal,
       discount,
       deliveryFee,
+      giftWrapFee,
+      giftMessage: giftWrap && giftMessage.trim() ? giftMessage.trim() : undefined,
       total,
       paymentMethod: db.paymentMethods.find((m) => m.id === payId)?.name ?? payId,
       coupon: couponRes?.ok ? couponCode : undefined,
@@ -77,6 +83,8 @@ function CheckoutInner() {
           `\n\nSubtotal: ${money(placed.subtotal)}` +
           (placed.discount ? `\nDiscount: − ${money(placed.discount)}` : '') +
           (placed.deliveryFee ? `\nDelivery: ${money(placed.deliveryFee)}` : '\nDelivery: FREE') +
+          (placed.giftWrapFee ? `\nGift wrap: ${money(placed.giftWrapFee)}` : '') +
+          (placed.giftMessage ? `\nGift message: ${placed.giftMessage}` : '') +
           `\n*Total: ${money(placed.total)}*\nPayment: ${placed.paymentMethod}`,
       )
     : '';
@@ -183,6 +191,36 @@ function CheckoutInner() {
             </div>
           </section>
 
+          {/* Gift wrapping */}
+          <section className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={giftWrap}
+                onChange={(e) => setGiftWrap(e.target.checked)}
+                className="mt-1 h-5 w-5 accent-[#D4AF37]"
+              />
+              <div>
+                <div className="text-sm font-semibold text-neutral-900">
+                  🎁 Gift wrap my order <span className="text-gold">+ {money(GIFT_WRAP_FEE)}</span>
+                </div>
+                <div className="text-xs text-neutral-600">
+                  Beautiful golden gift wrapping with ribbon — perfect for presents!
+                </div>
+              </div>
+            </label>
+            {giftWrap && (
+              <textarea
+                value={giftMessage}
+                onChange={(e) => setGiftMessage(e.target.value)}
+                placeholder="Gift message card (optional) — e.g. Happy Birthday! Love, Amma ❤️"
+                rows={2}
+                maxLength={200}
+                className="mt-3 w-full rounded-md bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold"
+              />
+            )}
+          </section>
+
           {error && <div className="rounded-md bg-red-900/30 p-3 text-sm text-red-300">{error}</div>}
         </div>
 
@@ -220,6 +258,12 @@ function CheckoutInner() {
             </div>
             {deliveryFee === 0 && (
               <div className="text-[11px] text-neutral-500">🎉 Free islandwide delivery on orders over Rs. 5,000</div>
+            )}
+            {giftWrapFee > 0 && (
+              <div className="flex justify-between text-neutral-700">
+                <span>🎁 Gift wrap</span>
+                <span className="tabular-nums">{money(giftWrapFee)}</span>
+              </div>
             )}
             <div className="flex justify-between pt-2 text-base font-bold">
               <span>Total</span>
