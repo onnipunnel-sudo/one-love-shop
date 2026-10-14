@@ -97,6 +97,7 @@ export interface Settings {
   announcement: string;
   flashSaleEnd: string; // ISO datetime
   groqApiKey?: string; // for the AI support chat agent (stored in browser only)
+  ntfyTopic?: string; // push-notification topic for new-order alerts (via ntfy.sh)
 }
 
 export interface Db {
@@ -179,6 +180,7 @@ function seedDb(): Db {
       announcement: '✨ Free islandwide delivery on orders over Rs. 5,000 ✨',
       // Flash sale ends 48h after first seed
       flashSaleEnd: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+      ntfyTopic: 'onelove-orders-x7k2m9q4',
     },
   };
 }

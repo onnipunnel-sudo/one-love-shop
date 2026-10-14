@@ -72,6 +72,20 @@ function CheckoutInner() {
     setDb(next);
     clear();
     setPlaced(order);
+    // 🔔 Push notification to admin's phone via ntfy (fire-and-forget).
+    // Only order ID + total are sent — no customer personal details.
+    try {
+      const topic = (next.settings.ntfyTopic || '').trim();
+      if (topic) {
+        fetch(`https://ntfy.sh/${encodeURIComponent(topic)}`, {
+          method: 'POST',
+          headers: { Title: '🔔 New ONE LOVE Order!' },
+          body: `Order ${order.id} — ${order.items.reduce((s, i) => s + i.qty, 0)} item(s), total ${money(order.total)}. Check WhatsApp for details.`,
+        }).catch(() => {});
+      }
+    } catch {
+      /* notification is best-effort */
+    }
   };
 
   const waText = placed

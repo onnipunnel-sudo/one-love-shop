@@ -1270,6 +1270,7 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
 function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const [announcement, setAnnouncement] = useState(db.settings.announcement);
+  const [ntfyTopic, setNtfyTopic] = useState(db.settings.ntfyTopic || '');
   const [pw1, setPw1] = useState('');
   const [pw2, setPw2] = useState('');
   const [msg, setMsg] = useState('');
@@ -1277,6 +1278,11 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const saveAnnouncement = () => {
     persist({ ...db, settings: { ...db.settings, announcement } });
     setMsg('Announcement banner updated.');
+  };
+
+  const saveNtfy = () => {
+    persist({ ...db, settings: { ...db.settings, ntfyTopic: ntfyTopic.trim() } });
+    setMsg('Notification topic saved.');
   };
 
   const changePw = () => {
@@ -1319,6 +1325,30 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
           <input value={announcement} onChange={(e) => setAnnouncement(e.target.value)} placeholder="Banner text (empty = hidden)" className={inputCls} />
           <button onClick={saveAnnouncement} className={btnGold}>Save</button>
         </div>
+      </div>
+
+      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+        <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">🔔 New-order push notifications</div>
+        <p className="mb-3 text-xs text-neutral-500">
+          When a customer places an order, your phone gets an instant push notification via the free <b>ntfy</b> app.
+          Setup: install <b>ntfy</b> from the Play Store → tap + → subscribe to this topic:
+        </p>
+        <div className="flex gap-3">
+          <input value={ntfyTopic} onChange={(e) => setNtfyTopic(e.target.value)} placeholder="ntfy topic" className={`${inputCls} font-mono`} />
+          <button onClick={saveNtfy} className={btnGold}>Save</button>
+        </div>
+        <button
+          onClick={() => {
+            fetch(`https://ntfy.sh/${encodeURIComponent(ntfyTopic.trim())}`, {
+              method: 'POST',
+              headers: { Title: '🔔 Test notification' },
+              body: 'This is a test from ONE LOVE admin. If you got this, notifications work! ✅',
+            }).then(() => setMsg('Test notification sent — check your phone!')).catch(() => setMsg('Could not send test.'));
+          }}
+          className={`${btnGhost} mt-3`}
+        >
+          📲 Send test notification
+        </button>
       </div>
 
       <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
