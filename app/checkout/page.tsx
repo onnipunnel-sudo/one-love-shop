@@ -3,10 +3,27 @@
 // order summary, Place Order → saved to localStorage + WhatsApp order button.
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useCart } from '@/lib/cart';
 import { validateCoupon } from '@/lib/coupon';
 import { Order, SHOP_WHATSAPP, deliveryFeeFor, loadDb, money, saveDb, uid } from '@/lib/store';
+
+// Builds the wa.me link that sends the full order to the shop's WhatsApp.
+function waUrlFor(o: Order): string {
+  const text = encodeURIComponent(
+    `*NEW ORDER — ONE LOVE* 🛍️\nOrder: ${o.id}\nName: ${o.customer}\nPhone: ${o.phone}\n` +
+      (o.whatsapp ? `WhatsApp: ${o.whatsapp}\n` : '') +
+      `Address: ${o.address}${o.city ? ', ' + o.city : ''}\n\n` +
+      o.items.map((i) => `• ${i.name} × ${i.qty} — ${money(i.price * i.qty)}`).join('\n') +
+      `\n\nSubtotal: ${money(o.subtotal)}` +
+      (o.discount ? `\nDiscount: − ${money(o.discount)}` : '') +
+      (o.deliveryFee ? `\nDelivery: ${money(o.deliveryFee)}` : '\nDelivery: FREE') +
+      (o.giftWrapFee ? `\nGift wrap: ${money(o.giftWrapFee)}` : '') +
+      (o.giftMessage ? `\nGift message: ${o.giftMessage}` : '') +
+      `\n*Total: ${money(o.total)}*\nPayment: ${o.paymentMethod}`,
+  );
+  return `https://wa.me/${SHOP_WHATSAPP}?text=${text}`;
+}
 
 function CheckoutInner() {
   const params = useSearchParams();
@@ -88,51 +105,8 @@ function CheckoutInner() {
     }
   };
 
-  const waText = placed
-    ? encodeURIComponent(
-        `*NEW ORDER — ONE LOVE* 🛍️\nOrder: ${placed.id}\nName: ${placed.customer}\nPhone: ${placed.phone}\n` +
-          (placed.whatsapp ? `WhatsApp: ${placed.whatsapp}\n` : '') +
-          `Address: ${placed.address}${placed.city ? ', ' + placed.city : ''}\n\n` +
-          placed.items.map((i) => `• ${i.name} × ${i.qty} — ${money(i.price * i.qty)}`).join('\n') +
-          `\n\nSubtotal: ${money(placed.subtotal)}` +
-          (placed.discount ? `\nDiscount: − ${money(placed.discount)}` : '') +
-          (placed.deliveryFee ? `\nDelivery: ${money(placed.deliveryFee)}` : '\nDelivery: FREE') +
-          (placed.giftWrapFee ? `\nGift wrap: ${money(placed.giftWrapFee)}` : '') +
-          (placed.giftMessage ? `\nGift message: ${placed.giftMessage}` : '') +
-          `\n*Total: ${money(placed.total)}*\nPayment: ${placed.paymentMethod}`,
-      )
-    : '';
-
   if (placed) {
-    return (
-      <div className="mx-auto max-w-xl py-10 text-center">
-        <div className="text-5xl">✅</div>
-        <h1 className="mt-4 text-2xl font-bold text-gold">Order placed successfully!</h1>
-        <p className="mt-2 text-sm text-neutral-600">
-          Order <span className="font-mono text-neutral-800">{placed.id}</span> · Total{' '}
-          <span className="font-bold text-gold">{money(placed.total)}</span>
-        </p>
-        <p className="mt-3 text-sm text-neutral-600">
-          Tap below to send your order to us on WhatsApp for fast confirmation:
-        </p>
-        <a
-          href={`https://wa.me/${SHOP_WHATSAPP}?text=${waText}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-5 inline-block rounded-md bg-[#25D366] px-8 py-3 font-bold text-white hover:brightness-110"
-        >
-          💬 Send Order via WhatsApp
-        </a>
-        <div>
-          <button
-            onClick={() => router.push('/')}
-            className="mt-4 text-sm text-neutral-600 underline hover:text-gold"
-          >
-            Continue shopping
-          </button>
-        </div>
-      </div>
-    );
+    return <OrderSuccess order={placed} />;
   }
 
   if (lines.length === 0) {
@@ -291,6 +265,64 @@ function CheckoutInner() {
             Place Order
           </button>
         </aside>
+      </div>
+    </div>
+  );
+}
+
+// Order success screen: auto-opens WhatsApp with the order prefilled after a
+// short countdown, so the admin gets notified even if the customer is passive.
+function OrderSuccess({ order }: { order: Order }) {
+  const router = useRouter();
+  const [countdown, setCountdown] = useState(5);
+  const [cancelled, setCancelled] = useState(false);
+  const waUrl = waUrlFor(order);
+
+  useEffect(() => {
+    if (cancelled) return;
+    if (countdown <= 0) {
+      window.location.href = waUrl;
+      return;
+    }
+    const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [countdown, cancelled, waUrl]);
+
+  return (
+    <div className="mx-auto max-w-xl py-10 text-center">
+      <div className="text-5xl">✅</div>
+      <h1 className="mt-4 text-2xl font-bold text-gold">Order placed successfully!</h1>
+      <p className="mt-2 text-sm text-neutral-600">
+        Order <span className="font-mono text-neutral-800">{order.id}</span> · Total{' '}
+        <span className="font-bold text-gold">{money(order.total)}</span>
+      </p>
+      {!cancelled ? (
+        <p className="mt-3 text-sm text-neutral-600">
+          ⏳ Opening WhatsApp in <b>{countdown}</b>s to send your order for fast confirmation…{' '}
+          <button onClick={() => setCancelled(true)} className="text-gold underline">
+            cancel
+          </button>
+        </p>
+      ) : (
+        <p className="mt-3 text-sm text-neutral-600">
+          Tap below to send your order to us on WhatsApp for fast confirmation:
+        </p>
+      )}
+      <a
+        href={waUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-5 inline-block rounded-md bg-[#25D366] px-8 py-3 font-bold text-white hover:brightness-110"
+      >
+        💬 Send Order via WhatsApp
+      </a>
+      <div>
+        <button
+          onClick={() => router.push('/')}
+          className="mt-4 text-sm text-neutral-600 underline hover:text-gold"
+        >
+          Continue shopping
+        </button>
       </div>
     </div>
   );
