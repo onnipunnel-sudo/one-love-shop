@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useCart } from '@/lib/cart';
 import { useWishlist } from '@/lib/wishlist';
+import { AdminLoginButton } from './AdminLogin';
 import { SHOP_PHONE } from '@/lib/store';
 
 export const CATEGORIES = ['Girls', 'Boys', 'Gifts', 'Electronics', 'Fashion', 'Home'];
@@ -72,6 +73,7 @@ export function Header() {
             🤍
             <WishlistBadge />
           </Link>
+          <AdminLoginButton />
           <Link href="/cart" className="relative shrink-0 p-2 text-2xl" aria-label="Cart">
             🛒
             {count > 0 && (

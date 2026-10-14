@@ -39,7 +39,6 @@ export function Footer() {
             <li><Link href="/track" className="hover:text-gold">📦 Track Your Order</Link></li>
             <li><Link href="/returns/" className="hover:text-gold">Returns & Refunds</Link></li>
             <li>Privacy Policy</li>
-            <li><Link href="/admin" className="text-neutral-600 hover:text-royal-light">🔐 Admin Login</Link></li>
           </ul>
         </div>
       </div>
