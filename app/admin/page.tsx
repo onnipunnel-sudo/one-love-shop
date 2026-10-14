@@ -1339,11 +1339,19 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         </div>
         <button
           onClick={() => {
-            fetch(`https://ntfy.sh/${encodeURIComponent(ntfyTopic.trim())}`, {
+            const t = ntfyTopic.trim();
+            if (!t) { setMsg('Enter a topic name first.'); return; }
+            setMsg('Sending…');
+            fetch(`https://ntfy.sh/${encodeURIComponent(t)}`, {
               method: 'POST',
               headers: { Title: '🔔 Test notification' },
               body: 'This is a test from ONE LOVE admin. If you got this, notifications work! ✅',
-            }).then(() => setMsg('Test notification sent — check your phone!')).catch(() => setMsg('Could not send test.'));
+            })
+              .then((r) => {
+                if (r.ok) setMsg('Test notification sent — check your phone! 📲');
+                else setMsg(`Send failed (server said ${r.status}). Check your internet and try again.`);
+              })
+              .catch(() => setMsg('Could not reach ntfy.sh — check your internet connection and try again.'));
           }}
           className={`${btnGhost} mt-3`}
         >

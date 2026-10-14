@@ -201,6 +201,8 @@ export function loadDb(): Db {
         if (!Array.isArray((db as Db).banners)) (db as Db).banners = seedDb().banners;
         if (!Array.isArray((db as Db).reviews)) (db as Db).reviews = seedDb().reviews;
         db.settings = { ...seedDb().settings, ...db.settings };
+        // ensure ntfy topic default exists on old settings
+        if (!db.settings.ntfyTopic) db.settings.ntfyTopic = seedDb().settings.ntfyTopic;
         return db;
       }
     }
