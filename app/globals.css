@@ -7,6 +7,36 @@ body {
   color: #f5f5f5;
 }
 
+/* subtle page fade-in */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+main {
+  animation: pageIn 0.35s ease-out;
+}
+
+/* tactile press on all buttons and links styled as buttons */
+button, a[class*="bg-gradient"], a[class*="bg-[#25D366]"] {
+  transition: transform 0.12s ease, opacity 0.15s ease, box-shadow 0.2s ease;
+}
+button:active {
+  transform: scale(0.97);
+}
+
+/* gold glow on primary CTAs */
+a[class*="from-gold"], button[class*="from-gold"] {
+  box-shadow: 0 2px 14px rgba(212, 175, 55, 0.25);
+}
+a[class*="from-gold"]:hover, button[class*="from-gold"]:hover {
+  box-shadow: 0 4px 22px rgba(212, 175, 55, 0.4);
+}
+
+/* image shimmer while loading */
+img {
+  background-color: #141416;
+}
+
 /* thin gold-purple scrollbar for the luxury feel */
 ::-webkit-scrollbar {
   width: 10px;

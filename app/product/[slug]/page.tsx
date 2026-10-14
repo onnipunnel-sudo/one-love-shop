@@ -23,7 +23,7 @@ function Stars({ rating }: { rating: number }) {
   return (
     <span className="text-xs text-gold" aria-label={`${rating} stars`}>
       {'★'.repeat(full)}
-      <span className="text-neutral-600">{'★'.repeat(5 - full)}</span>
+      <span className="text-neutral-400">{'★'.repeat(5 - full)}</span>
     </span>
   );
 }
@@ -107,20 +107,25 @@ export default function ProductSlugPage({ params }: { params: { slug: string } }
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Link href="/" className="text-sm text-neutral-600 hover:text-gold">
+      <Link href="/" className="text-sm text-neutral-400 hover:text-gold">
         ← Back to products
       </Link>
 
       <div className="mt-4 grid gap-8 md:grid-cols-2">
-        <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200">
+        <div className="relative overflow-hidden rounded-xl bg-ink-card ring-1 ring-royal/20">
           <img
             src={product.image}
             alt={product.name}
             className="aspect-square w-full object-cover"
           />
           {pct && (
-            <span className="absolute left-3 top-3 rounded bg-gold px-2 py-1 text-sm font-bold text-black">
-              -{pct}%
+            <span className="absolute left-3 top-3 rounded-full bg-gradient-to-r from-gold to-gold-light px-3 py-1 text-sm font-extrabold text-black shadow-lg">
+              -{pct}% OFF
+            </span>
+          )}
+          {product.flashSale && (
+            <span className="absolute right-3 top-3 animate-pulse rounded-full bg-royal px-3 py-1 text-sm font-extrabold text-white shadow-lg">
+              ⚡ FLASH SALE
             </span>
           )}
         </div>
@@ -130,7 +135,7 @@ export default function ProductSlugPage({ params }: { params: { slug: string } }
             {product.category}
           </div>
           <div className="mt-1 flex items-start justify-between gap-3">
-            <h1 className="text-2xl font-bold text-neutral-900">{product.name}</h1>
+            <h1 className="text-2xl font-bold text-neutral-100">{product.name}</h1>
             <div className="flex shrink-0 items-center gap-2">
               <ShareButton name={product.name} price={product.price} />
               <WishlistHeart productId={product.id} big />
@@ -160,11 +165,28 @@ export default function ProductSlugPage({ params }: { params: { slug: string } }
 
           <AddToCart productId={product.id} stock={product.stock} />
 
-          <div className="mt-8 border-t border-neutral-200 pt-4">
+          {/* Trust badges */}
+          <div className="mt-6 grid grid-cols-3 gap-2">
+            {[
+              ['💵', 'COD Available'],
+              ['🚚', 'Fast Delivery'],
+              ['↩️', '7-Day Returns'],
+            ].map(([icon, label]) => (
+              <div
+                key={label}
+                className="rounded-lg bg-ink-card px-2 py-3 text-center ring-1 ring-royal/20"
+              >
+                <div className="text-xl">{icon}</div>
+                <div className="mt-1 text-[11px] font-semibold text-neutral-300">{label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 border-t border-royal/20 pt-4">
             <div className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">
               Description
             </div>
-            <p className="text-sm leading-relaxed text-neutral-700">{product.description}</p>
+            <p className="text-sm leading-relaxed text-neutral-300">{product.description}</p>
           </div>
         </div>
       </div>

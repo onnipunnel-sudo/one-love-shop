@@ -36,7 +36,7 @@ export default function CartPage() {
     return (
       <div className="py-16 text-center">
         <div className="text-5xl">🛒</div>
-        <div className="mt-4 text-xl text-neutral-700">Your cart is empty</div>
+        <div className="mt-4 text-xl text-neutral-300">Your cart is empty</div>
         <Link
           href="/"
           className="mt-6 inline-block rounded-md bg-gold px-6 py-3 font-bold text-black hover:bg-gold-dark"
@@ -58,18 +58,18 @@ export default function CartPage() {
             return (
               <div
                 key={l.productId}
-                className="flex gap-4 rounded-lg bg-white p-3 ring-1 ring-neutral-200"
+                className="flex gap-4 rounded-lg bg-ink-card p-3 ring-1 ring-royal/20"
               >
                 <Link href={`/product/${productSlug(p.name)}/`} className="shrink-0">
                   <img src={p.image} alt={p.name} className="h-20 w-20 rounded-md object-cover" />
                 </Link>
                 <div className="flex flex-1 flex-col">
-                  <Link href={`/product/${productSlug(p.name)}/`} className="text-sm text-neutral-800 hover:text-gold">
+                  <Link href={`/product/${productSlug(p.name)}/`} className="text-sm text-neutral-200 hover:text-gold">
                     {p.name}
                   </Link>
                   <div className="mt-1 text-sm font-bold text-gold">{money(p.price)}</div>
                   <div className="mt-auto flex items-center justify-between pt-2">
-                    <div className="flex items-center rounded-md ring-1 ring-neutral-200">
+                    <div className="flex items-center rounded-md ring-1 ring-royal/20">
                       <button
                         onClick={() => setQty(l.productId, l.qty - 1)}
                         className="px-2.5 py-1 hover:text-gold"
@@ -99,9 +99,9 @@ export default function CartPage() {
           })}
         </div>
 
-        <aside className="h-fit rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+        <aside className="h-fit rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
           <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">Order Summary</div>
-          <div className="flex justify-between text-sm text-neutral-700">
+          <div className="flex justify-between text-sm text-neutral-300">
             <span>Subtotal</span>
             <span className="tabular-nums">{money(subtotal)}</span>
           </div>
@@ -113,7 +113,7 @@ export default function CartPage() {
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 placeholder="Coupon code"
-                className="h-10 w-full rounded-md bg-white px-3 text-sm uppercase outline-none ring-1 ring-neutral-200 placeholder:normal-case placeholder:text-neutral-500 focus:ring-gold"
+                className="h-10 w-full rounded-md bg-ink-card px-3 text-sm uppercase outline-none ring-1 ring-royal/20 placeholder:normal-case placeholder:text-neutral-500 focus:ring-gold"
               />
               <button
                 onClick={applyCoupon}
@@ -137,7 +137,7 @@ export default function CartPage() {
               <span className="tabular-nums">− {money(couponDiscount)}</span>
             </div>
           )}
-          <div className="mt-3 flex justify-between border-t border-neutral-200 pt-3 text-base font-bold">
+          <div className="mt-3 flex justify-between border-t border-royal/20 pt-3 text-base font-bold">
             <span>Total</span>
             <span className="text-gold tabular-nums">{money(total)}</span>
           </div>

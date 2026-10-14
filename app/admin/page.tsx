@@ -59,7 +59,7 @@ function MediaThumb({ image, video }: { image: string; video?: string }) {
 function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <label className="block">
-      <div className="mb-1 text-xs font-semibold text-neutral-600">{label}</div>
+      <div className="mb-1 text-xs font-semibold text-neutral-400">{label}</div>
       {children}
       {hint && <div className="mt-1 text-[11px] leading-snug text-neutral-400">{hint}</div>}
     </label>
@@ -141,7 +141,7 @@ export default function AdminPage() {
   if (!authed) {
     return (
       <div className="mx-auto max-w-sm py-20">
-        <div className="rounded-xl bg-white p-8 text-center ring-1 ring-gold/30">
+        <div className="rounded-xl bg-ink-card p-8 text-center ring-1 ring-gold/30">
           <img src="/logo.png" alt="ONE LOVE" className="mx-auto h-16 w-16 rounded-full ring-2 ring-gold" />
           <h1 className="mt-4 font-serif text-xl text-gold">Admin Access</h1>
           <p className="mt-1 text-xs text-neutral-500">This area is private.</p>
@@ -183,7 +183,7 @@ export default function AdminPage() {
             key={t}
             onClick={() => setTab(t)}
             className={`rounded-md px-4 py-2 text-sm font-semibold ${
-              tab === t ? 'bg-gold text-black' : 'bg-white text-neutral-700 ring-1 ring-neutral-300 hover:ring-gold/50'
+              tab === t ? 'bg-gold text-black' : 'bg-ink-card text-neutral-300 ring-1 ring-neutral-300 hover:ring-gold/50'
             }`}
           >
             {t}
@@ -271,7 +271,7 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
   return (
     <div>
-      <div className="mb-4 rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+      <div className="mb-4 rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
         <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">
           {editing ? 'Edit product' : 'Add product'}
         </div>
@@ -312,11 +312,11 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             <input type="number" value={form.stock || ''} onChange={(e) => set('stock', Number(e.target.value))} placeholder="e.g. 25" className={inputCls} />
           </Field>
           <Field label="Description" hint="Short selling text shown on the product page.">
-            <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="e.g. Luxury preserved rose in a golden gift box…" rows={2} className="w-full rounded-md bg-white px-3 py-2.5 text-sm outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
+            <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="e.g. Luxury preserved rose in a golden gift box…" rows={2} className="w-full rounded-md bg-ink-card px-3 py-2.5 text-sm outline-none ring-1 ring-royal/20 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
           </Field>
           <div className="sm:col-span-2">
-            <div className="mb-1 text-xs font-semibold text-neutral-600">Badges</div>
-            <div className="flex items-center gap-6 text-sm text-neutral-700">
+            <div className="mb-1 text-xs font-semibold text-neutral-400">Badges</div>
+            <div className="flex items-center gap-6 text-sm text-neutral-300">
               <label className="flex items-center gap-2" title="Shows in the Featured section on the homepage">
                 <input type="checkbox" checked={!!form.featured} onChange={(e) => set('featured', e.target.checked)} className="accent-[#D4AF37]" /> ⭐ Featured
               </label>
@@ -337,15 +337,15 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             <button onClick={() => { setEditing(null); setForm(emptyProduct); }} className={btnGhost}>Cancel</button>
           )}
         </div>
-        {msg && <div className="mt-2 text-xs font-medium text-neutral-700">{msg}</div>}
+        {msg && <div className="mt-2 text-xs font-medium text-neutral-300">{msg}</div>}
       </div>
 
-      <div className="overflow-x-auto rounded-lg bg-white ring-1 ring-neutral-200">
+      <div className="overflow-x-auto rounded-lg bg-ink-card ring-1 ring-royal/20">
         <table className="w-full min-w-[720px]">
-          <thead><tr className="border-b border-neutral-200"><th className={thCls}>Img</th><th className={thCls}>Name</th><th className={thCls}>Price</th><th className={thCls}>Stock</th><th className={thCls}>Flags</th><th className={thCls}>Actions</th></tr></thead>
+          <thead><tr className="border-b border-royal/20"><th className={thCls}>Img</th><th className={thCls}>Name</th><th className={thCls}>Price</th><th className={thCls}>Stock</th><th className={thCls}>Flags</th><th className={thCls}>Actions</th></tr></thead>
           <tbody>
             {db.products.map((p) => (
-              <tr key={p.id} className="border-b border-neutral-200">
+              <tr key={p.id} className="border-b border-royal/20">
                 <td className={tdCls}><MediaThumb image={p.image} video={p.video} /></td>
                 <td className={tdCls}>{p.name}<div className="text-xs text-neutral-500">{p.category}</div></td>
                 <td className={tdCls}>{money(p.price)}{p.oldPrice ? <span className="text-xs text-neutral-500 line-through"> {money(p.oldPrice)}</span> : null}</td>
@@ -447,7 +447,7 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
   return (
     <div>
-      <div className="mb-4 rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+      <div className="mb-4 rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
         <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">
           {editing ? 'Edit promo' : 'New promo post'}
         </div>
@@ -472,7 +472,7 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
               )}
             </div>
           </div>
-          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Description * — sell it here" rows={3} className="w-full rounded-md bg-white px-3 py-2.5 text-sm outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
+          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Description * — sell it here" rows={3} className="w-full rounded-md bg-ink-card px-3 py-2.5 text-sm outline-none ring-1 ring-royal/20 placeholder:text-neutral-500 focus:ring-gold sm:col-span-2" />
         </div>
         <div className="mt-3 flex gap-3">
           {form.image && <img src={form.image} alt="preview" className="h-20 w-20 rounded object-cover ring-1 ring-gold/40" />}
@@ -484,15 +484,15 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             <button onClick={() => { setEditing(null); setForm(emptyPromo); }} className={btnGhost}>Cancel</button>
           )}
         </div>
-        {msg && <div className="mt-2 text-xs font-medium text-neutral-700">{msg}</div>}
+        {msg && <div className="mt-2 text-xs font-medium text-neutral-300">{msg}</div>}
       </div>
 
-      <div className="overflow-x-auto rounded-lg bg-white ring-1 ring-neutral-200">
+      <div className="overflow-x-auto rounded-lg bg-ink-card ring-1 ring-royal/20">
         <table className="w-full min-w-[720px]">
-          <thead><tr className="border-b border-neutral-200"><th className={thCls}>Media</th><th className={thCls}>Title</th><th className={thCls}>Price</th><th className={thCls}>Offer</th><th className={thCls}>Actions</th></tr></thead>
+          <thead><tr className="border-b border-royal/20"><th className={thCls}>Media</th><th className={thCls}>Title</th><th className={thCls}>Price</th><th className={thCls}>Offer</th><th className={thCls}>Actions</th></tr></thead>
           <tbody>
             {db.promos.map((p) => (
-              <tr key={p.id} className="border-b border-neutral-200">
+              <tr key={p.id} className="border-b border-royal/20">
                 <td className={tdCls}><MediaThumb image={p.image} video={p.video} /></td>
                 <td className={tdCls}>{p.title}<div className="text-xs text-neutral-500">{new Date(p.date).toLocaleDateString('en-LK')}</div></td>
                 <td className={tdCls}>{money(p.price)}{p.oldPrice ? <span className="text-xs text-neutral-500 line-through"> {money(p.oldPrice)}</span> : null}</td>
@@ -623,7 +623,7 @@ function ReviewsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <span className="font-semibold text-gold">{r.name}</span>
-          <span className="ml-2 text-gold">{'★'.repeat(r.rating)}<span className="text-neutral-600">{'★'.repeat(5 - r.rating)}</span></span>
+          <span className="ml-2 text-gold">{'★'.repeat(r.rating)}<span className="text-neutral-400">{'★'.repeat(5 - r.rating)}</span></span>
           <div className="text-xs text-neutral-400">
             {productName(r.productId)} · {new Date(r.date).toLocaleString()}
           </div>
@@ -799,11 +799,11 @@ function BulkTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   };
 
   return (
-    <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+    <div className="rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
       <div className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">
         📷 Bulk from gallery — select many at once
       </div>
-      <p className="mb-3 text-xs text-neutral-600">
+      <p className="mb-3 text-xs text-neutral-400">
         Pick multiple photos/videos from the gallery in one go, then fill in the details for each below
         and hit <b>“Add all products”</b>. Photos are auto-compressed; videos up to 500MB each.
       </p>
@@ -822,7 +822,7 @@ function BulkTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         <>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {drafts.map((d) => (
-              <div key={d.key} className="rounded-lg p-3 ring-1 ring-neutral-200">
+              <div key={d.key} className="rounded-lg p-3 ring-1 ring-royal/20">
                 <div className="flex gap-3">
                   {d.isVideo ? (
                     <video src={d.previewUrl} className="h-16 w-16 shrink-0 rounded object-cover" muted playsInline />
@@ -900,7 +900,7 @@ function PaymentsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
   return (
     <div>
-      <div className="mb-4 rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+      <div className="mb-4 rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">{editingId ? 'Edit' : 'Add'} payment method</div>
         <div className="grid gap-3 sm:grid-cols-2">
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name (e.g. Bank Transfer)" className={inputCls} />
@@ -913,10 +913,10 @@ function PaymentsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       </div>
       <div className="space-y-2">
         {db.paymentMethods.map((m) => (
-          <div key={m.id} className="flex items-center justify-between rounded-lg bg-white p-4 ring-1 ring-neutral-200">
+          <div key={m.id} className="flex items-center justify-between rounded-lg bg-ink-card p-4 ring-1 ring-royal/20">
             <div>
-              <div className="text-sm font-semibold text-neutral-900">{m.name}</div>
-              <div className="text-xs text-neutral-600">{m.details || '—'}</div>
+              <div className="text-sm font-semibold text-neutral-100">{m.name}</div>
+              <div className="text-xs text-neutral-400">{m.details || '—'}</div>
             </div>
             <div className="flex gap-2">
               <button onClick={() => { setEditingId(m.id); setName(m.name); setDetails(m.details); }} className={btnGhost}>Edit</button>
@@ -957,7 +957,7 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   return (
     <div className="space-y-6">
       {/* Flash sale countdown setting */}
-      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">⚡ Flash sale countdown ends at</div>
         <div className="flex gap-3">
           <input type="datetime-local" value={flashEnd} onChange={(e) => setFlashEnd(e.target.value)} className={`${inputCls} max-w-xs`} />
@@ -966,7 +966,7 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       </div>
 
       {/* Coupon form */}
-      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
         <div className="mb-1 text-sm font-bold uppercase tracking-wider text-gold">{editing ? 'Edit' : 'Add'} coupon / offer</div>
         <p className="mb-3 text-xs text-neutral-500">
           Coupons give customers a discount at checkout when they type the code.
@@ -995,13 +995,13 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             <input type="date" value={form.expiry} onChange={(e) => set('expiry', e.target.value)} className={inputCls} />
           </Field>
           <Field label="Active?" hint="Turn off to pause the coupon without deleting it.">
-            <label className="flex h-10 items-center gap-2 text-sm text-neutral-700">
+            <label className="flex h-10 items-center gap-2 text-sm text-neutral-300">
               <input type="checkbox" checked={form.active} onChange={(e) => set('active', e.target.checked)} className="accent-[#D4AF37]" /> Active
             </label>
           </Field>
         </div>
         {form.code.trim() && (
-          <div className="mt-3 rounded-md bg-neutral-50 p-3 text-xs text-neutral-600 ring-1 ring-neutral-200">
+          <div className="mt-3 rounded-md bg-ink-soft p-3 text-xs text-neutral-400 ring-1 ring-royal/20">
             Preview: customer types <b className="text-gold">{form.code.trim().toUpperCase()}</b> on a Rs. 2,000 cart
             {form.minOrder > 2000 ? (
               <> → <b className="text-red-500">won't apply</b> (needs Rs. {form.minOrder.toLocaleString('en-LK')} minimum)</>
@@ -1019,12 +1019,12 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       </div>
 
       {/* Coupon list */}
-      <div className="overflow-x-auto rounded-lg bg-white ring-1 ring-neutral-200">
+      <div className="overflow-x-auto rounded-lg bg-ink-card ring-1 ring-royal/20">
         <table className="w-full min-w-[640px]">
-          <thead><tr className="border-b border-neutral-200"><th className={thCls}>Code</th><th className={thCls}>Discount</th><th className={thCls}>Min order</th><th className={thCls}>Expiry</th><th className={thCls}>Active</th><th className={thCls}>Actions</th></tr></thead>
+          <thead><tr className="border-b border-royal/20"><th className={thCls}>Code</th><th className={thCls}>Discount</th><th className={thCls}>Min order</th><th className={thCls}>Expiry</th><th className={thCls}>Active</th><th className={thCls}>Actions</th></tr></thead>
           <tbody>
             {db.coupons.map((c) => (
-              <tr key={c.code} className="border-b border-neutral-200">
+              <tr key={c.code} className="border-b border-royal/20">
                 <td className={`${tdCls} font-mono text-gold`}>{c.code}</td>
                 <td className={tdCls}>{c.kind === 'percent' ? `${c.value}%` : money(c.value)}</td>
                 <td className={tdCls}>{c.minOrder ? money(c.minOrder) : '—'}</td>
@@ -1072,7 +1072,7 @@ function DashboardTab({ db }: { db: Db }) {
 
   const lowStock = db.products.filter((p) => (p.stock ?? 0) <= 5);
 
-  const card = 'rounded-lg bg-white p-5 ring-1 ring-neutral-200';
+  const card = 'rounded-lg bg-ink-card p-5 ring-1 ring-royal/20';
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -1106,10 +1106,10 @@ function DashboardTab({ db }: { db: Db }) {
             {top.map((t) => (
               <div key={t.name}>
                 <div className="flex justify-between text-sm">
-                  <span className="truncate text-neutral-800">{t.name}</span>
+                  <span className="truncate text-neutral-200">{t.name}</span>
                   <span className="ml-2 shrink-0 text-neutral-500 tabular-nums">{t.qty} sold · {money(t.revenue)}</span>
                 </div>
-                <div className="mt-1 h-2 overflow-hidden rounded bg-neutral-100">
+                <div className="mt-1 h-2 overflow-hidden rounded bg-ink-soft">
                   <div className="h-full rounded bg-gradient-to-r from-gold to-royal" style={{ width: `${Math.round((t.qty / maxQty) * 100)}%` }} />
                 </div>
               </div>
@@ -1122,7 +1122,7 @@ function DashboardTab({ db }: { db: Db }) {
           <div className="space-y-1.5">
             {lowStock.map((p) => (
               <div key={p.id} className="flex justify-between text-sm">
-                <span className="truncate text-neutral-800">{p.name}</span>
+                <span className="truncate text-neutral-200">{p.name}</span>
                 <span className={`ml-2 shrink-0 font-bold tabular-nums ${(p.stock ?? 0) === 0 ? 'text-red-500' : 'text-yellow-500'}`}>
                   {p.stock ?? 0} left
                 </span>
@@ -1257,7 +1257,7 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       </div>
 
       {showNew && (
-        <div className="rounded-lg bg-white p-5 ring-1 ring-gold/40">
+        <div className="rounded-lg bg-ink-card p-5 ring-1 ring-gold/40">
           <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">New manual order</div>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Customer name *">
@@ -1294,8 +1294,8 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
                   {cItems.map((i) => {
                     const p = db.products.find((x) => x.id === i.productId);
                     return (
-                      <div key={i.productId} className="flex items-center justify-between rounded bg-neutral-50 px-3 py-1.5 text-sm ring-1 ring-neutral-200">
-                        <span className="text-neutral-800">{p?.name}</span>
+                      <div key={i.productId} className="flex items-center justify-between rounded bg-ink-soft px-3 py-1.5 text-sm ring-1 ring-royal/20">
+                        <span className="text-neutral-200">{p?.name}</span>
                         <span className="flex items-center gap-2">
                           <button onClick={() => setCItems((items) => items.map((x) => (x.productId === i.productId ? { ...x, qty: Math.max(1, x.qty - 1) } : x)))} className="px-2 font-bold text-neutral-500">−</button>
                           <span className="tabular-nums">{i.qty}</span>
@@ -1319,9 +1319,9 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
               </select>
             </Field>
           </div>
-          <div className="mt-3 rounded-md bg-neutral-50 p-3 text-sm ring-1 ring-neutral-200">
-            <div className="flex justify-between text-neutral-700"><span>Subtotal</span><span className="tabular-nums">{money(cSubtotal)}</span></div>
-            <div className="flex justify-between text-neutral-700"><span>Delivery</span><span className="tabular-nums">{cDeliveryFee > 0 ? money(cDeliveryFee) : 'FREE'}</span></div>
+          <div className="mt-3 rounded-md bg-ink-soft p-3 text-sm ring-1 ring-royal/20">
+            <div className="flex justify-between text-neutral-300"><span>Subtotal</span><span className="tabular-nums">{money(cSubtotal)}</span></div>
+            <div className="flex justify-between text-neutral-300"><span>Delivery</span><span className="tabular-nums">{cDeliveryFee > 0 ? money(cDeliveryFee) : 'FREE'}</span></div>
             <div className="flex justify-between pt-1 text-base font-bold"><span>Total</span><span className="text-gold tabular-nums">{money(cSubtotal + cDeliveryFee)}</span></div>
           </div>
           <div className="mt-3">
@@ -1332,14 +1332,14 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       )}
 
       {db.orders.length === 0 && !showNew && (
-        <div className="rounded-lg bg-white p-8 text-center text-neutral-600 ring-1 ring-neutral-200">No orders yet.</div>
+        <div className="rounded-lg bg-ink-card p-8 text-center text-neutral-400 ring-1 ring-royal/20">No orders yet.</div>
       )}
       {db.orders.map((o) => (
-        <div key={o.id} className="rounded-lg bg-white p-4 ring-1 ring-neutral-200">
+        <div key={o.id} className="rounded-lg bg-ink-card p-4 ring-1 ring-royal/20">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <span className="font-mono text-sm text-gold">{o.id}</span>
-              <span className="ml-3 text-sm text-neutral-800">{o.customer} · {o.phone}</span>
+              <span className="ml-3 text-sm text-neutral-200">{o.customer} · {o.phone}</span>
               <div className="text-xs text-neutral-500">
                 {new Date(o.date).toLocaleString()} · {o.paymentMethod} ·{' '}
                 <span className={o.status === 'completed' ? 'text-green-400' : 'text-yellow-400'}>{o.status}</span>
@@ -1374,7 +1374,7 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             </div>
           </div>
           {open === o.id && (
-            <div className="mt-3 border-t border-neutral-200 pt-3 text-sm text-neutral-700">
+            <div className="mt-3 border-t border-royal/20 pt-3 text-sm text-neutral-300">
               <div className="mb-1">📍 {o.address}{o.city ? `, ${o.city}` : ''}</div>
               {o.whatsapp && <div className="mb-1">💬 WhatsApp: {o.whatsapp}</div>}
               {o.coupon && <div className="mb-2 text-green-400">Coupon: {o.coupon} (−{money(o.discount)})</div>}
@@ -1386,7 +1386,7 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
                   <li key={idx}>• {i.name} × {i.qty} — {money(i.price * i.qty)}</li>
                 ))}
               </ul>
-              <div className="mt-2 space-y-0.5 border-t border-neutral-200 pt-2">
+              <div className="mt-2 space-y-0.5 border-t border-royal/20 pt-2">
                 <div className="flex justify-between"><span>Subtotal</span><span className="tabular-nums">{money(o.subtotal)}</span></div>
                 {(o.deliveryFee ?? 0) > 0 && <div className="flex justify-between"><span>Delivery</span><span className="tabular-nums">{money(o.deliveryFee ?? 0)}</span></div>}
                 <div className="flex justify-between font-bold"><span>Total</span><span className="text-gold tabular-nums">{money(o.total)}</span></div>
@@ -1466,7 +1466,7 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">Announcement banner</div>
         <div className="flex gap-3">
           <input value={announcement} onChange={(e) => setAnnouncement(e.target.value)} placeholder="Banner text (empty = hidden)" className={inputCls} />
@@ -1474,7 +1474,7 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         </div>
       </div>
 
-      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">🔔 New-order push notifications</div>
         <p className="mb-3 text-xs text-neutral-500">
           When a customer places an order, your phone gets an instant push notification via the free <b>ntfy</b> app.
@@ -1506,7 +1506,7 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         </button>
       </div>
 
-      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">⚡ Flash sale end time</div>
         <div className="flex flex-wrap items-center gap-3">
           <input
@@ -1532,7 +1532,7 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         </div>
       </div>
 
-      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">Change admin password</div>
         <div className="grid gap-3 sm:grid-cols-2">
           <input type="password" value={pw1} onChange={(e) => setPw1(e.target.value)} placeholder="New password" className={inputCls} />
@@ -1541,7 +1541,7 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         <button onClick={changePw} className={`${btnGold} mt-3`}>Change password</button>
       </div>
 
-      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+      <div className="rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
         <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">Backup / restore</div>
         <div className="flex flex-wrap gap-3">
           <button onClick={exportJson} className={btnGold}>⬇ Export all data (JSON)</button>

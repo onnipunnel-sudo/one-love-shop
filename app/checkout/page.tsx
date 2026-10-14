@@ -111,7 +111,7 @@ function CheckoutInner() {
 
   if (lines.length === 0) {
     return (
-      <div className="py-16 text-center text-neutral-600">
+      <div className="py-16 text-center text-neutral-400">
         Your cart is empty.{' '}
         <button onClick={() => router.push('/')} className="text-gold underline">
           Shop now
@@ -121,7 +121,7 @@ function CheckoutInner() {
   }
 
   const inputCls =
-    'h-11 w-full rounded-md bg-white px-3 text-sm text-neutral-900 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold';
+    'h-11 w-full rounded-md bg-ink-card px-3 text-sm text-neutral-100 outline-none ring-1 ring-royal/20 placeholder:text-neutral-500 focus:ring-gold';
 
   return (
     <div className="py-6">
@@ -129,7 +129,7 @@ function CheckoutInner() {
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6">
           {/* Customer details */}
-          <section className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+          <section className="rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
             <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">
               Delivery Details
             </div>
@@ -144,14 +144,14 @@ function CheckoutInner() {
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Delivery address * (street, house no.)"
                 rows={2}
-                className="w-full rounded-md bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold"
+                className="w-full rounded-md bg-ink-card px-3 py-2.5 text-sm text-neutral-100 outline-none ring-1 ring-royal/20 placeholder:text-neutral-500 focus:ring-gold"
               />
               <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City *" className={inputCls} />
             </div>
           </section>
 
           {/* Payment methods */}
-          <section className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+          <section className="rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
             <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">
               Payment Method
             </div>
@@ -171,8 +171,8 @@ function CheckoutInner() {
                     className="mt-1 accent-[#D4AF37]"
                   />
                   <div>
-                    <div className="text-sm font-semibold text-neutral-900">{m.name}</div>
-                    {m.details && <div className="text-xs text-neutral-600">{m.details}</div>}
+                    <div className="text-sm font-semibold text-neutral-100">{m.name}</div>
+                    {m.details && <div className="text-xs text-neutral-400">{m.details}</div>}
                   </div>
                 </label>
               ))}
@@ -180,7 +180,7 @@ function CheckoutInner() {
           </section>
 
           {/* Gift wrapping */}
-          <section className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+          <section className="rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
             <label className="flex cursor-pointer items-start gap-3">
               <input
                 type="checkbox"
@@ -189,10 +189,10 @@ function CheckoutInner() {
                 className="mt-1 h-5 w-5 accent-[#D4AF37]"
               />
               <div>
-                <div className="text-sm font-semibold text-neutral-900">
+                <div className="text-sm font-semibold text-neutral-100">
                   🎁 Gift wrap my order <span className="text-gold">+ {money(GIFT_WRAP_FEE)}</span>
                 </div>
-                <div className="text-xs text-neutral-600">
+                <div className="text-xs text-neutral-400">
                   Beautiful golden gift wrapping with ribbon — perfect for presents!
                 </div>
               </div>
@@ -204,7 +204,7 @@ function CheckoutInner() {
                 placeholder="Gift message card (optional) — e.g. Happy Birthday! Love, Amma ❤️"
                 rows={2}
                 maxLength={200}
-                className="mt-3 w-full rounded-md bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold"
+                className="mt-3 w-full rounded-md bg-ink-card px-3 py-2.5 text-sm text-neutral-100 outline-none ring-1 ring-royal/20 placeholder:text-neutral-500 focus:ring-gold"
               />
             )}
           </section>
@@ -213,14 +213,14 @@ function CheckoutInner() {
         </div>
 
         {/* Summary */}
-        <aside className="h-fit rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+        <aside className="h-fit rounded-lg bg-ink-card p-5 ring-1 ring-royal/20">
           <div className="mb-4 text-sm font-bold uppercase tracking-wider text-gold">Order Summary</div>
           <div className="max-h-56 space-y-2 overflow-y-auto text-sm">
             {lines.map((l) => {
               const p = products.get(l.productId);
               if (!p) return null;
               return (
-                <div key={l.productId} className="flex justify-between text-neutral-700">
+                <div key={l.productId} className="flex justify-between text-neutral-300">
                   <span className="line-clamp-1">
                     {p.name} × {l.qty}
                   </span>
@@ -229,8 +229,8 @@ function CheckoutInner() {
               );
             })}
           </div>
-          <div className="mt-4 space-y-1 border-t border-neutral-200 pt-3 text-sm">
-            <div className="flex justify-between text-neutral-700">
+          <div className="mt-4 space-y-1 border-t border-royal/20 pt-3 text-sm">
+            <div className="flex justify-between text-neutral-300">
               <span>Subtotal</span>
               <span className="tabular-nums">{money(subtotal)}</span>
             </div>
@@ -240,7 +240,7 @@ function CheckoutInner() {
                 <span className="tabular-nums">− {money(discount)}</span>
               </div>
             )}
-            <div className="flex justify-between text-neutral-700">
+            <div className="flex justify-between text-neutral-300">
               <span>Delivery</span>
               <span className="tabular-nums">{deliveryFee > 0 ? money(deliveryFee) : <b className="text-green-400">FREE</b>}</span>
             </div>
@@ -248,7 +248,7 @@ function CheckoutInner() {
               <div className="text-[11px] text-neutral-500">🎉 Free islandwide delivery on orders over Rs. 5,000</div>
             )}
             {giftWrapFee > 0 && (
-              <div className="flex justify-between text-neutral-700">
+              <div className="flex justify-between text-neutral-300">
                 <span>🎁 Gift wrap</span>
                 <span className="tabular-nums">{money(giftWrapFee)}</span>
               </div>
@@ -292,19 +292,19 @@ function OrderSuccess({ order }: { order: Order }) {
     <div className="mx-auto max-w-xl py-10 text-center">
       <div className="text-5xl">✅</div>
       <h1 className="mt-4 text-2xl font-bold text-gold">Order placed successfully!</h1>
-      <p className="mt-2 text-sm text-neutral-600">
-        Order <span className="font-mono text-neutral-800">{order.id}</span> · Total{' '}
+      <p className="mt-2 text-sm text-neutral-400">
+        Order <span className="font-mono text-neutral-200">{order.id}</span> · Total{' '}
         <span className="font-bold text-gold">{money(order.total)}</span>
       </p>
       {!cancelled ? (
-        <p className="mt-3 text-sm text-neutral-600">
+        <p className="mt-3 text-sm text-neutral-400">
           ⏳ Opening WhatsApp in <b>{countdown}</b>s to send your order for fast confirmation…{' '}
           <button onClick={() => setCancelled(true)} className="text-gold underline">
             cancel
           </button>
         </p>
       ) : (
-        <p className="mt-3 text-sm text-neutral-600">
+        <p className="mt-3 text-sm text-neutral-400">
           Tap below to send your order to us on WhatsApp for fast confirmation:
         </p>
       )}
@@ -319,7 +319,7 @@ function OrderSuccess({ order }: { order: Order }) {
       <div>
         <button
           onClick={() => router.push('/')}
-          className="mt-4 text-sm text-neutral-600 underline hover:text-gold"
+          className="mt-4 text-sm text-neutral-400 underline hover:text-gold"
         >
           Continue shopping
         </button>
@@ -330,7 +330,7 @@ function OrderSuccess({ order }: { order: Order }) {
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={<div className="py-10 text-center text-neutral-600">Loading…</div>}>
+    <Suspense fallback={<div className="py-10 text-center text-neutral-400">Loading…</div>}>
       <CheckoutInner />
     </Suspense>
   );
