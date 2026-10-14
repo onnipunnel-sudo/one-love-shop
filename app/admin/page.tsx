@@ -525,10 +525,10 @@ function BannersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const save = () => {
     if (!form.title.trim()) { setMsg('Banner title is required.'); return; }
     const banner: Banner = { ...form, id: editing ? editing.id : uid('banner') };
-    const banners = editing
+    const next = editing
       ? banners.map((b) => (b.id === editing.id ? banner : b))
       : [...banners, banner];
-    persist({ ...db, banners });
+    persist({ ...db, banners: next });
     setMsg(editing ? 'Banner updated.' : 'Banner added.');
     setForm(emptyBanner);
     setEditing(null);
