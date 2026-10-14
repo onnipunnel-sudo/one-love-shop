@@ -81,7 +81,7 @@ export function SupportChat() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Chat with AI assistant"
-        className="fixed bottom-20 left-5 z-50 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-royal-deep to-black shadow-lg shadow-royal/40 ring-2 ring-gold transition-transform hover:scale-110"
+        className="fixed bottom-36 right-5 z-50 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-royal-deep to-black shadow-lg shadow-royal/40 ring-2 ring-gold transition-transform hover:scale-110"
       >
         {open ? (
           <span className="text-2xl text-white">✕</span>
@@ -90,7 +90,7 @@ export function SupportChat() {
         )}
       </button>
       {open && (
-        <div className="fixed bottom-36 left-5 z-50 flex h-[420px] w-[320px] flex-col overflow-hidden rounded-2xl bg-ink-card shadow-2xl ring-1 ring-royal/30">
+        <div className="fixed bottom-52 right-5 z-50 flex h-[420px] w-[320px] flex-col overflow-hidden rounded-2xl bg-ink-card shadow-2xl ring-1 ring-royal/30">
           <div className="bg-gradient-to-r from-royal-deep to-black px-4 py-3 text-white">
             <div className="flex items-center gap-2">
               <img src="/lova-robot.png" alt="Lova" className="h-8 w-8 rounded-full ring-1 ring-gold" />
