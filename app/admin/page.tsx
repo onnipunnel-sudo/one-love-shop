@@ -90,7 +90,7 @@ function downscaleImageFile(file: File): Promise<string> {
   });
 }
 
-const TABS = ['Products', 'Promos', 'Banners', 'Reviews', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
+const TABS = ['Dashboard', 'Products', 'Promos', 'Banners', 'Reviews', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
 
 const inputCls =
   'h-10 w-full rounded-md bg-ink-card px-3 text-sm text-neutral-100 outline-none ring-1 ring-royal/30 placeholder:text-neutral-500 focus:ring-gold';
@@ -191,6 +191,7 @@ export default function AdminPage() {
         ))}
       </div>
 
+      {tab === 'Dashboard' && <DashboardTab db={db} />}
       {tab === 'Products' && <ProductsTab db={db} persist={persist} />}
       {tab === 'Promos' && <PromosTab db={db} persist={persist} />}
       {tab === 'Banners' && <BannersTab db={db} persist={persist} />}
@@ -1047,7 +1048,130 @@ function CouponsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   );
 }
 
+/* ───────────────────────── Dashboard ───────────────────────── */
+
+function DashboardTab({ db }: { db: Db }) {
+  const valid = db.orders.filter((o) => o.status !== 'cancelled');
+  const revenue = valid.reduce((s, o) => s + o.total, 0);
+  const today = new Date().toDateString();
+  const todayOrders = valid.filter((o) => new Date(o.date).toDateString() === today);
+  const todayRevenue = todayOrders.reduce((s, o) => s + o.total, 0);
+  const pending = db.orders.filter((o) => o.status === 'pending').length;
+
+  const byProduct = new Map<string, { name: string; qty: number; revenue: number }>();
+  for (const o of valid) {
+    for (const i of o.items) {
+      const cur = byProduct.get(i.productId) ?? { name: i.name, qty: 0, revenue: 0 };
+      cur.qty += i.qty;
+      cur.revenue += i.price * i.qty;
+      byProduct.set(i.productId, cur);
+    }
+  }
+  const top = [...byProduct.values()].sort((a, b) => b.qty - a.qty).slice(0, 5);
+  const maxQty = top[0]?.qty || 1;
+
+  const lowStock = db.products.filter((p) => (p.stock ?? 0) <= 5);
+
+  const card = 'rounded-lg bg-white p-5 ring-1 ring-neutral-200';
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className={card}>
+          <div className="text-xs font-bold uppercase tracking-wider text-neutral-500">💰 Total revenue</div>
+          <div className="mt-1 text-2xl font-bold text-gold tabular-nums">{money(revenue)}</div>
+          <div className="mt-1 text-xs text-neutral-500">{valid.length} orders (excl. cancelled)</div>
+        </div>
+        <div className={card}>
+          <div className="text-xs font-bold uppercase tracking-wider text-neutral-500">📅 Today</div>
+          <div className="mt-1 text-2xl font-bold text-gold tabular-nums">{money(todayRevenue)}</div>
+          <div className="mt-1 text-xs text-neutral-500">{todayOrders.length} orders today</div>
+        </div>
+        <div className={card}>
+          <div className="text-xs font-bold uppercase tracking-wider text-neutral-500">⏳ Pending orders</div>
+          <div className="mt-1 text-2xl font-bold text-yellow-500 tabular-nums">{pending}</div>
+          <div className="mt-1 text-xs text-neutral-500">need confirmation</div>
+        </div>
+        <div className={card}>
+          <div className="text-xs font-bold uppercase tracking-wider text-neutral-500">📦 Products</div>
+          <div className="mt-1 text-2xl font-bold text-gold tabular-nums">{db.products.length}</div>
+          <div className="mt-1 text-xs text-neutral-500">{db.products.filter((p) => p.featured).length} featured</div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className={card}>
+          <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">🏆 Top products</div>
+          {top.length === 0 && <div className="text-sm text-neutral-500">No sales yet.</div>}
+          <div className="space-y-2">
+            {top.map((t) => (
+              <div key={t.name}>
+                <div className="flex justify-between text-sm">
+                  <span className="truncate text-neutral-800">{t.name}</span>
+                  <span className="ml-2 shrink-0 text-neutral-500 tabular-nums">{t.qty} sold · {money(t.revenue)}</span>
+                </div>
+                <div className="mt-1 h-2 overflow-hidden rounded bg-neutral-100">
+                  <div className="h-full rounded bg-gradient-to-r from-gold to-royal" style={{ width: `${Math.round((t.qty / maxQty) * 100)}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className={card}>
+          <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">⚠️ Low stock (≤ 5)</div>
+          {lowStock.length === 0 && <div className="text-sm text-neutral-500">All stocked up. ✅</div>}
+          <div className="space-y-1.5">
+            {lowStock.map((p) => (
+              <div key={p.id} className="flex justify-between text-sm">
+                <span className="truncate text-neutral-800">{p.name}</span>
+                <span className={`ml-2 shrink-0 font-bold tabular-nums ${(p.stock ?? 0) === 0 ? 'text-red-500' : 'text-yellow-500'}`}>
+                  {p.stock ?? 0} left
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ───────────────────────── Orders ───────────────────────── */
+
+// Normalize a Sri Lankan phone number to international format for wa.me links.
+function normalizeLkPhone(raw: string): string {
+  const d = raw.replace(/\D/g, '');
+  if (d.startsWith('94') && d.length >= 11) return d;
+  if (d.startsWith('0') && d.length === 10) return '94' + d.slice(1);
+  if (d.length === 9 && d.startsWith('7')) return '94' + d;
+  return d;
+}
+
+const STATUS_EMOJI: Record<Order['status'], string> = {
+  pending: '📝',
+  confirmed: '✅',
+  shipped: '🚚',
+  delivered: '📦',
+  completed: '🎉',
+  cancelled: '❌',
+};
+
+function customerStatusMessage(o: Order): string {
+  const head = `${STATUS_EMOJI[o.status]} *ONE LOVE* — Order ${o.id}`;
+  switch (o.status) {
+    case 'confirmed':
+      return `${head}\nYour order is confirmed! We're packing it now. 🛍️\nTotal: ${money(o.total)} (${o.paymentMethod})`;
+    case 'shipped':
+      return `${head}\nYour order is on its way! 🚚\nTotal: ${money(o.total)} — please keep it ready.`;
+    case 'delivered':
+      return `${head}\nDelivered! Enjoy your purchase. ⭐\nLoved it? Leave us a review on the website!`;
+    case 'completed':
+      return `${head}\nThank you for shopping with ONE LOVE! 🎉 Hope to see you again.`;
+    case 'cancelled':
+      return `${head}\nThis order was cancelled. Reply here if you have any questions.`;
+    default:
+      return `${head}\nWe received your order and will confirm it shortly. 📝\nTotal: ${money(o.total)}`;
+  }
+}
 
 function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const [open, setOpen] = useState<string | null>(null);
@@ -1224,6 +1348,15 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             <div className="flex items-center gap-2">
               <span className="font-bold text-gold">{money(o.total)}</span>
               <button onClick={() => setOpen(open === o.id ? null : o.id)} className={btnGhost}>Details</button>
+              <a
+                href={`https://wa.me/${normalizeLkPhone(o.whatsapp || o.phone)}?text=${encodeURIComponent(customerStatusMessage(o))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Send status update to customer on WhatsApp"
+                className="rounded-md bg-[#25D366] px-3 py-1.5 text-xs font-bold text-white hover:brightness-110"
+              >
+                💬 Notify
+              </a>
               <select
                 value={o.status}
                 onChange={(e) => setStatus(o, e.target.value as Order['status'])}
@@ -1271,6 +1404,13 @@ function OrdersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const [announcement, setAnnouncement] = useState(db.settings.announcement);
   const [ntfyTopic, setNtfyTopic] = useState(db.settings.ntfyTopic || '');
+  const [flashEnd, setFlashEnd] = useState(() => {
+    try {
+      const d = new Date(db.settings.flashSaleEnd);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } catch { return ''; }
+  });
   const [pw1, setPw1] = useState('');
   const [pw2, setPw2] = useState('');
   const [msg, setMsg] = useState('');
@@ -1283,6 +1423,13 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
   const saveNtfy = () => {
     persist({ ...db, settings: { ...db.settings, ntfyTopic: ntfyTopic.trim() } });
     setMsg('Notification topic saved.');
+  };
+
+  const saveFlashEnd = (iso: string) => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) { setMsg('Pick a valid date & time.'); return; }
+    persist({ ...db, settings: { ...db.settings, flashSaleEnd: d.toISOString() } });
+    setMsg('Flash sale end time updated.');
   };
 
   const changePw = () => {
@@ -1357,6 +1504,32 @@ function SettingsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
         >
           📲 Send test notification
         </button>
+      </div>
+
+      <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">
+        <div className="mb-3 text-sm font-bold uppercase tracking-wider text-gold">⚡ Flash sale end time</div>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="datetime-local"
+            value={flashEnd}
+            onChange={(e) => setFlashEnd(e.target.value)}
+            className={inputCls}
+            aria-label="Flash sale end time"
+          />
+          <button onClick={() => saveFlashEnd(flashEnd)} className={btnGold}>Save</button>
+          <button
+            onClick={() => {
+              const d = new Date(Date.now() + 24 * 3600 * 1000);
+              const pad = (n: number) => String(n).padStart(2, '0');
+              const v = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+              setFlashEnd(v);
+              saveFlashEnd(v);
+            }}
+            className={btnGhost}
+          >
+            +24h from now
+          </button>
+        </div>
       </div>
 
       <div className="rounded-lg bg-white p-5 ring-1 ring-neutral-200">

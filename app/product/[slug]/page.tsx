@@ -8,6 +8,7 @@ import { AddToCart } from './AddToCart';
 import { ProductCard } from '@/components/ProductCard';
 import { ProductReviews } from '@/components/ProductReviews';
 import { WishlistHeart } from '@/components/WishlistHeart';
+import { ShareButton } from '@/components/ShareButton';
 import { loadDb, money, productSlug, findBySlug, SHOP_CITY } from '@/lib/store';
 
 const SITE_URL = 'https://one-love-shop.vercel.app';
@@ -130,7 +131,10 @@ export default function ProductSlugPage({ params }: { params: { slug: string } }
           </div>
           <div className="mt-1 flex items-start justify-between gap-3">
             <h1 className="text-2xl font-bold text-neutral-900">{product.name}</h1>
-            <WishlistHeart productId={product.id} big />
+            <div className="flex shrink-0 items-center gap-2">
+              <ShareButton name={product.name} price={product.price} />
+              <WishlistHeart productId={product.id} big />
+            </div>
           </div>
           <div className="mt-2">
             <Stars rating={product.rating} />{' '}

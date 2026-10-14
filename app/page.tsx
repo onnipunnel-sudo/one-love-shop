@@ -163,12 +163,21 @@ function HomeInner() {
         <>
           {/* ── Flash Sale ── */}
           {flash.length > 0 && (
-            <section className="mt-8">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gold">⚡ Flash Sale</h2>
-                <Countdown endISO={db.settings.flashSaleEnd} />
+            <section className="mt-8 overflow-hidden rounded-xl bg-gradient-to-r from-royal via-[#3b1470] to-ink ring-1 ring-gold/40">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">⚡</span>
+                  <div>
+                    <h2 className="text-xl font-bold text-gold">Flash Sale</h2>
+                    <p className="text-[11px] text-neutral-400">Hurry — deals end soon!</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-300">Ends in</span>
+                  <Countdown endISO={db.settings.flashSaleEnd} />
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              <div className="grid grid-cols-2 gap-3 px-4 pb-4 sm:grid-cols-3 sm:px-6 lg:grid-cols-5">
                 {flash.map((p) => (
                   <ProductCard key={p.id} p={p} />
                 ))}
