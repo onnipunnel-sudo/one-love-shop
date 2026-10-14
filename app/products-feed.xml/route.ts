@@ -11,7 +11,9 @@ export async function GET() {
     .map((p) => {
       const url = `${SITE_URL}/product/${productSlug(p.name)}/`;
       const availability = p.stock > 0 ? 'in_stock' : 'out_of_stock';
-      const salePrice = p.oldPrice && p.oldPrice > p.price ? p.oldPrice : null;
+      // Google semantics: <g:price> = regular price, <g:sale_price> = discounted price (must be lower).
+      const hasDiscount = p.oldPrice != null && p.oldPrice > p.price;
+      const regularPrice = hasDiscount ? p.oldPrice : p.price;
       const imageUrl = p.image.startsWith('http') ? p.image : `${SITE_URL}${p.image}`;
       return `    <item>
       <g:id>${p.id}</g:id>
@@ -21,8 +23,8 @@ export async function GET() {
       <g:image_link>${imageUrl}</g:image_link>
       <g:condition>new</g:condition>
       <g:availability>${availability}</g:availability>
-      <g:price>${p.price} LKR</g:price>
-      ${salePrice ? `<g:sale_price>${salePrice} LKR</g:sale_price>` : ''}
+      <g:price>${regularPrice} LKR</g:price>
+      ${hasDiscount ? `<g:sale_price>${p.price} LKR</g:sale_price>` : ''}
       <g:brand>ONE LOVE</g:brand>
       <g:product_type><![CDATA[${p.category}]]></g:product_type>
       <g:google_product_category>Gift &amp; Lifestyle</g:google_product_category>
