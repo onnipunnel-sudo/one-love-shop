@@ -194,8 +194,10 @@ export function loadDb(): Db {
     if (raw) {
       const db = JSON.parse(raw) as Db;
       if (db && Array.isArray(db.products)) {
-        // migrate older DBs: ensure promos exist
+        // migrate older DBs: ensure promos/banners/reviews exist
         if (!Array.isArray((db as Db).promos)) (db as Db).promos = seedDb().promos;
+        if (!Array.isArray((db as Db).banners)) (db as Db).banners = seedDb().banners;
+        if (!Array.isArray((db as Db).reviews)) (db as Db).reviews = seedDb().reviews;
         db.settings = { ...seedDb().settings, ...db.settings };
         return db;
       }

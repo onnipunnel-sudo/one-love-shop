@@ -516,6 +516,7 @@ function PromosTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 const emptyBanner: Banner = { id: '', title: '', sub: '', cta: 'Shop Now', link: '/', active: true };
 
 function BannersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
+  const banners = db.banners || [];
   const [form, setForm] = useState<Banner>(emptyBanner);
   const [editing, setEditing] = useState<Banner | null>(null);
   const [msg, setMsg] = useState('');
@@ -525,8 +526,8 @@ function BannersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
     if (!form.title.trim()) { setMsg('Banner title is required.'); return; }
     const banner: Banner = { ...form, id: editing ? editing.id : uid('banner') };
     const banners = editing
-      ? db.banners.map((b) => (b.id === editing.id ? banner : b))
-      : [...db.banners, banner];
+      ? banners.map((b) => (b.id === editing.id ? banner : b))
+      : [...banners, banner];
     persist({ ...db, banners });
     setMsg(editing ? 'Banner updated.' : 'Banner added.');
     setForm(emptyBanner);
@@ -535,15 +536,15 @@ function BannersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
 
   const del = (id: string) => {
     if (!confirm('Delete this banner?')) return;
-    persist({ ...db, banners: db.banners.filter((b) => b.id !== id) });
+    persist({ ...db, banners: banners.filter((b) => b.id !== id) });
   };
 
   const toggle = (b: Banner) => {
-    persist({ ...db, banners: db.banners.map((x) => (x.id === b.id ? { ...x, active: !x.active } : x)) });
+    persist({ ...db, banners: banners.map((x) => (x.id === b.id ? { ...x, active: !x.active } : x)) });
   };
 
   const move = (id: string, dir: -1 | 1) => {
-    const arr = [...db.banners];
+    const arr = [...banners];
     const i = arr.findIndex((b) => b.id === id);
     const j = i + dir;
     if (i < 0 || j < 0 || j >= arr.length) return;
@@ -577,11 +578,11 @@ function BannersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
       </div>
 
       <div className="space-y-2">
-        {db.banners.map((b, i) => (
+        {banners.map((b, i) => (
           <div key={b.id} className={`flex items-center gap-3 rounded-lg p-3 ring-1 ${b.active ? 'bg-ink-card ring-royal/20' : 'bg-ink-soft ring-neutral-700 opacity-60'}`}>
             <div className="flex flex-col gap-1">
               <button onClick={() => move(b.id, -1)} disabled={i === 0} className="text-neutral-400 hover:text-gold disabled:opacity-30">▲</button>
-              <button onClick={() => move(b.id, 1)} disabled={i === db.banners.length - 1} className="text-neutral-400 hover:text-gold disabled:opacity-30">▼</button>
+              <button onClick={() => move(b.id, 1)} disabled={i === banners.length - 1} className="text-neutral-400 hover:text-gold disabled:opacity-30">▼</button>
             </div>
             <div className="flex-1">
               <div className="font-bold text-gold">{b.title}</div>
@@ -592,7 +593,7 @@ function BannersTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
             <button onClick={() => del(b.id)} className="rounded-md px-3 py-1.5 text-xs text-red-400 ring-1 ring-red-900 hover:ring-red-500">Delete</button>
           </div>
         ))}
-        {db.banners.length === 0 && <div className="text-sm text-neutral-500">No banners yet. Add one above!</div>}
+        {banners.length === 0 && <div className="text-sm text-neutral-500">No banners yet. Add one above!</div>}
       </div>
     </div>
   );
