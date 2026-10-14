@@ -24,9 +24,9 @@ export function ProductCard({ p }: { p: Product }) {
   return (
     <Link
       href={`/product/${productSlug(p.name)}/`}
-      className="group flex flex-col overflow-hidden rounded-lg bg-white ring-1 ring-neutral-200 transition hover:ring-gold/60"
+      className="group flex flex-col overflow-hidden rounded-lg bg-ink-card ring-1 ring-royal/20 transition hover:ring-gold/60"
     >
-      <div className="relative aspect-square overflow-hidden bg-neutral-100">
+      <div className="relative aspect-square overflow-hidden bg-ink-soft">
         <img
           src={p.image}
           alt={p.name}
@@ -34,18 +34,18 @@ export function ProductCard({ p }: { p: Product }) {
           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
         />
         {pct && (
-          <span className="absolute left-2 top-2 rounded bg-gold px-1.5 py-0.5 text-[11px] font-bold text-black">
+          <span className="absolute left-2 top-2 rounded bg-gradient-to-r from-gold to-royal px-1.5 py-0.5 text-[11px] font-bold text-black">
             -{pct}%
           </span>
         )}
         {p.flashSale && (
-          <span className="absolute right-2 top-2 rounded bg-red-600 px-1.5 py-0.5 text-[11px] font-bold text-white">
+          <span className="absolute right-2 top-2 rounded bg-royal px-1.5 py-0.5 text-[11px] font-bold text-white">
             FLASH
           </span>
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <div className="line-clamp-2 text-sm text-neutral-800">{p.name}</div>
+        <div className="line-clamp-2 text-sm text-neutral-200">{p.name}</div>
         <div className="mt-auto">
           <div className="text-base font-bold text-gold">{money(p.price)}</div>
           {p.oldPrice && p.oldPrice > p.price && (
@@ -53,7 +53,7 @@ export function ProductCard({ p }: { p: Product }) {
           )}
           <div className="mt-1 flex items-center justify-between">
             <Stars rating={p.rating} />
-            <span className="text-[11px] text-neutral-500">
+            <span className="text-[11px] text-neutral-400">
               {p.stock > 0 ? `In stock` : 'Sold out'}
             </span>
           </div>

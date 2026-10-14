@@ -91,11 +91,11 @@ function downscaleImageFile(file: File): Promise<string> {
 const TABS = ['Products', 'Promos', 'Bulk Import', 'Payments', 'Coupons', 'Orders', 'Settings'] as const;
 
 const inputCls =
-  'h-10 w-full rounded-md bg-white px-3 text-sm text-neutral-900 outline-none ring-1 ring-neutral-200 placeholder:text-neutral-500 focus:ring-gold';
-const btnGold = 'rounded-md bg-gold px-4 py-2 text-sm font-bold text-black hover:bg-gold-dark';
-const btnGhost = 'rounded-md px-3 py-1.5 text-xs ring-1 ring-neutral-300 hover:ring-gold hover:text-gold';
-const thCls = 'px-3 py-2 text-left text-xs uppercase tracking-wider text-neutral-500';
-const tdCls = 'px-3 py-2 text-sm text-neutral-700';
+  'h-10 w-full rounded-md bg-ink-card px-3 text-sm text-neutral-100 outline-none ring-1 ring-royal/30 placeholder:text-neutral-500 focus:ring-gold';
+const btnGold = 'rounded-md bg-gradient-to-r from-gold to-royal px-4 py-2 text-sm font-bold text-black hover:opacity-90';
+const btnGhost = 'rounded-md px-3 py-1.5 text-xs text-neutral-300 ring-1 ring-royal/30 hover:ring-gold hover:text-gold';
+const thCls = 'px-3 py-2 text-left text-xs uppercase tracking-wider text-neutral-400';
+const tdCls = 'px-3 py-2 text-sm text-neutral-200';
 
 const emptyProduct: Product = {
   id: '',
@@ -115,7 +115,7 @@ const emptyProduct: Product = {
 export default function AdminPage() {
   const [db, setDb] = useState<Db>(loadDb);
   const [authed, setAuthed] = useState(
-    () => typeof window !== 'undefined' && sessionStorage.getItem('onelove_admin') === '1',
+    () => typeof window !== 'undefined' && localStorage.getItem('onelove_admin') === '1',
   );
   const [pw, setPw] = useState('');
   const [pwErr, setPwErr] = useState('');
@@ -128,7 +128,7 @@ export default function AdminPage() {
 
   const login = () => {
     if (hashPassword(pw) === db.settings.adminPasswordHash) {
-      sessionStorage.setItem('onelove_admin', '1');
+      localStorage.setItem('onelove_admin', '1');
       setAuthed(true);
       setPwErr('');
     } else {
@@ -166,7 +166,7 @@ export default function AdminPage() {
         <h1 className="text-2xl font-bold text-gold">Admin Dashboard</h1>
         <button
           onClick={() => {
-            sessionStorage.removeItem('onelove_admin');
+            localStorage.removeItem('onelove_admin');
             setAuthed(false);
           }}
           className={btnGhost}

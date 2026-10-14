@@ -23,7 +23,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40">
       {/* Top utility strip (decorative links) */}
-      <div className="bg-neutral-100 text-[11px] text-neutral-600">
+      <div className="bg-ink-soft text-[11px] text-neutral-400">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5">
           <span className="text-gold">🚚 Free delivery on orders over Rs. 5,000</span>
           <div className="flex gap-4">
@@ -35,7 +35,7 @@ export function Header() {
       </div>
 
       {/* Main header */}
-      <div className="border-b border-gold/20 bg-white">
+      <div className="border-b border-royal/30 bg-ink">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:gap-6">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <img src="/logo.png" alt="ONE LOVE" className="h-11 w-11 rounded-full ring-2 ring-gold" />
@@ -47,11 +47,11 @@ export function Header() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search products, brands and more…"
-              className="h-10 w-full rounded-l-md bg-white px-4 text-sm text-neutral-900 outline-none ring-gold/40 placeholder:text-neutral-500 focus:ring-2"
+              className="h-10 w-full rounded-l-md bg-ink-card px-4 text-sm text-neutral-100 outline-none ring-royal/40 placeholder:text-neutral-500 focus:ring-2"
             />
             <button
               type="submit"
-              className="h-10 shrink-0 rounded-r-md bg-gold px-4 text-sm font-bold text-black hover:bg-gold-dark"
+              className="h-10 shrink-0 rounded-r-md bg-gradient-to-r from-gold to-royal px-4 text-sm font-bold text-black hover:opacity-90"
             >
               🔍
             </button>
@@ -60,7 +60,7 @@ export function Header() {
           <Link href="/cart" className="relative shrink-0 p-2 text-2xl" aria-label="Cart">
             🛒
             {count > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gold px-1 text-[11px] font-bold text-black">
+              <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-royal px-1 text-[11px] font-bold text-white">
                 {count}
               </span>
             )}
@@ -68,16 +68,16 @@ export function Header() {
         </div>
 
         {/* Category nav */}
-        <nav className="border-t border-neutral-200">
+        <nav className="border-t border-royal/20">
           <div className="mx-auto flex max-w-7xl gap-6 overflow-x-auto px-4 py-2 text-sm">
-            <Link href="/" className="whitespace-nowrap text-neutral-700 hover:text-gold">
+            <Link href="/" className="whitespace-nowrap text-neutral-300 hover:text-gold">
               All Products
             </Link>
             {CATEGORIES.map((c) => (
               <Link
                 key={c}
                 href={`/?cat=${encodeURIComponent(c)}`}
-                className="whitespace-nowrap text-neutral-700 hover:text-gold"
+                className="whitespace-nowrap text-neutral-300 hover:text-gold"
               >
                 {c}
               </Link>

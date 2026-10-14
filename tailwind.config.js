@@ -9,6 +9,12 @@ module.exports = {
           dark: '#C9A227',
           light: '#F1D87A',
         },
+        royal: {
+          DEFAULT: '#7C3AED',
+          dark: '#6D28D9',
+          light: '#A78BFA',
+          deep: '#4C1D95',
+        },
         ink: {
           DEFAULT: '#0d0d0f',
           soft: '#141416',
