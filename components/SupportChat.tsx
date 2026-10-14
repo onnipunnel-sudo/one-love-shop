@@ -81,25 +81,34 @@ export function SupportChat() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Chat with AI assistant"
-        className="fixed bottom-20 left-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-black text-2xl shadow-lg shadow-black/40 ring-2 ring-gold transition-transform hover:scale-110"
+        className="fixed bottom-20 left-5 z-50 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-royal-deep to-black shadow-lg shadow-royal/40 ring-2 ring-gold transition-transform hover:scale-110"
       >
-        {open ? '✕' : '💬'}
+        {open ? (
+          <span className="text-2xl text-white">✕</span>
+        ) : (
+          <img src="/lova-robot.png" alt="Lova AI" className="h-full w-full object-cover" />
+        )}
       </button>
       {open && (
-        <div className="fixed bottom-36 left-5 z-50 flex h-[420px] w-[320px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-neutral-200">
-          <div className="bg-black px-4 py-3 text-white">
-            <div className="font-bold text-gold">Lova ✨</div>
-            <div className="text-xs text-neutral-400">ONE LOVE AI helper — தமிழ் / English / සිංහල</div>
+        <div className="fixed bottom-36 left-5 z-50 flex h-[420px] w-[320px] flex-col overflow-hidden rounded-2xl bg-ink-card shadow-2xl ring-1 ring-royal/30">
+          <div className="bg-gradient-to-r from-royal-deep to-black px-4 py-3 text-white">
+            <div className="flex items-center gap-2">
+              <img src="/lova-robot.png" alt="Lova" className="h-8 w-8 rounded-full ring-1 ring-gold" />
+              <div>
+                <div className="font-bold text-gold">Lova ✨</div>
+                <div className="text-xs text-neutral-400">ONE LOVE AI helper — தமிழ் / English / සිංහල</div>
+              </div>
+            </div>
           </div>
-          <div className="flex-1 space-y-2 overflow-y-auto bg-neutral-50 p-3">
+          <div className="flex-1 space-y-2 overflow-y-auto bg-ink-soft p-3">
             {unavailable ? (
-              <div className="rounded-lg bg-white p-3 text-sm text-neutral-600 ring-1 ring-neutral-200">
+              <div className="rounded-lg bg-ink-card p-3 text-sm text-neutral-300 ring-1 ring-royal/20">
                 The AI helper isn&apos;t set up yet — please call <b>075-1346314</b> or use WhatsApp chat. 🙏
               </div>
             ) : (
               <>
                 {msgs.length === 0 && (
-                  <div className="rounded-lg bg-white p-3 text-sm text-neutral-600 ring-1 ring-neutral-200">
+                  <div className="rounded-lg bg-ink-card p-3 text-sm text-neutral-300 ring-1 ring-royal/20">
                     வணக்கம்! 🙏 How can I help you today? / මට උදව් කළ හැක්කේ කෙසේද?
                   </div>
                 )}
@@ -108,8 +117,8 @@ export function SupportChat() {
                     key={i}
                     className={`max-w-[85%] rounded-lg p-2.5 text-sm ${
                       m.role === 'user'
-                        ? 'ml-auto bg-gold text-black'
-                        : 'bg-white text-neutral-800 ring-1 ring-neutral-200'
+                        ? 'ml-auto bg-gradient-to-r from-gold to-royal text-black'
+                        : 'bg-ink-card text-neutral-200 ring-1 ring-royal/20'
                     }`}
                   >
                     {m.text}
@@ -121,15 +130,15 @@ export function SupportChat() {
             <div ref={bottomRef} />
           </div>
           {!unavailable && (
-            <div className="flex gap-2 border-t border-neutral-200 p-2">
+            <div className="flex gap-2 border-t border-royal/20 bg-ink-card p-2">
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && send()}
                 placeholder="Type your question…"
-                className="h-10 flex-1 rounded-md bg-white px-3 text-sm outline-none ring-1 ring-neutral-200 focus:ring-gold"
+                className="h-10 flex-1 rounded-md bg-ink-soft px-3 text-sm text-neutral-100 outline-none ring-1 ring-royal/30 placeholder:text-neutral-500 focus:ring-gold"
               />
-              <button onClick={send} disabled={busy} className="rounded-md bg-gold px-4 text-sm font-bold text-black disabled:opacity-50">
+              <button onClick={send} disabled={busy} className="rounded-md bg-gradient-to-r from-gold to-royal px-4 text-sm font-bold text-black disabled:opacity-50">
                 ➤
               </button>
             </div>

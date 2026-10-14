@@ -106,7 +106,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
-      <body className="min-h-screen bg-white text-neutral-900 antialiased">
+      <body className="min-h-screen bg-ink text-neutral-100 antialiased">
         <CartProvider>
           <Header />
           <main className="mx-auto max-w-7xl px-4 pb-24">{children}</main>
