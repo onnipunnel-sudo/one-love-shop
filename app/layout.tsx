@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer';
 import { BottomNav } from '@/components/BottomNav';
 import { WhatsAppFloat } from '@/components/WhatsAppFloat';
 import { SupportChat } from '@/components/SupportChat';
+import { OrderNotifier } from '@/components/OrderNotifier';
 import './globals.css';
 
 const SITE_URL = 'https://one-love-shop.vercel.app';
@@ -114,6 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <BottomNav />
           <WhatsAppFloat />
           <SupportChat />
+          <OrderNotifier />
         </CartProvider>
       </body>
     </html>
