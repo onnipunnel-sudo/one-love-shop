@@ -266,7 +266,7 @@ function ProductsTab({ db, persist }: { db: Db; persist: (d: Db) => void }) {
     if (!confirm('Delete this product?')) return;
     const gone = db.products.find((p) => p.id === id);
     if (gone) dropIdbRef(gone.video);
-    persist({ ...db, products: db.products.filter((p) => p.id !== id) });
+    persist({ ...db, products: db.products.filter((p) => p.id !== id), deletedProductIds: Array.from(new Set([...(db.deletedProductIds ?? []), id])) });
   };
 
   return (

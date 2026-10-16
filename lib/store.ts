@@ -109,6 +109,7 @@ export interface Db {
   paymentMethods: PaymentMethod[];
   orders: Order[];
   settings: Settings;
+  deletedProductIds?: string[]; // seed product ids the admin deleted on purpose (never re-merge)
 }
 
 const DB_KEY = 'onelove_db_v1';
@@ -236,6 +237,17 @@ export function loadDb(): Db {
         db.settings = { ...seedDb().settings, ...db.settings };
         // ensure ntfy topic default exists on old settings
         if (!db.settings.ntfyTopic) db.settings.ntfyTopic = seedDb().settings.ntfyTopic;
+        // merge new seed products (e.g. WhatsApp catalog imports) into older saved
+        // DBs, without resurrecting products the admin deleted on purpose
+        const gone = new Set<string>(db.deletedProductIds ?? []);
+        const have = new Set(db.products.map((p) => p.id));
+        let added = 0;
+        for (const p of seedDb().products) {
+          if (!have.has(p.id) && !gone.has(p.id)) { db.products.push(p); have.add(p.id); added++; }
+        }
+        if (added > 0) {
+          try { window.localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch { /* ignore */ }
+        }
         return db;
       }
     }
