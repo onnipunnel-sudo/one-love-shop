@@ -1,13 +1,14 @@
 'use client';
 // Site header: top utility strip, logo + search + cart, category nav.
-// NOTE: there is intentionally NO link to /admin anywhere public.
+// NOTE: there is intentionally NO admin entry point visible to the public —
+// the 👑 Admin button renders only when this browser holds a valid admin login.
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useCart } from '@/lib/cart';
 import { useWishlist } from '@/lib/wishlist';
-import { AdminLoginButton } from './AdminLogin';
+import { AdminNavButton } from './AdminLogin';
 import { SHOP_PHONE } from '@/lib/store';
 
 export const CATEGORIES = ['Girls', 'Boys', 'Gifts', 'Electronics', 'Fashion', 'Home'];
@@ -73,7 +74,7 @@ export function Header() {
             🤍
             <WishlistBadge />
           </Link>
-          <AdminLoginButton />
+          <AdminNavButton />
           <Link href="/cart" className="relative shrink-0 p-2 text-2xl" aria-label="Cart">
             🛒
             {count > 0 && (
