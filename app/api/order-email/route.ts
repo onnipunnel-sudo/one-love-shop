@@ -1,9 +1,13 @@
 // POST /api/order-email — emails the full order details to the shop admin.
 // Called fire-and-forget from checkout right after an order is placed.
 // Sends via Resend (free tier). Requires RESEND_API_KEY env var on Vercel.
+// NOTE: the connected Resend account belongs to onnipunnel@gmail.com, and the
+// free tier only delivers to the account owner's address, so admin
+// notifications go there (not the website email) until a domain is verified
+// or a second Resend account is added.
 import { NextResponse } from 'next/server';
 
-const ADMIN_EMAIL = 'rusaikahamed86@gmail.com';
+const ADMIN_EMAIL = 'onnipunnel@gmail.com';
 
 function esc(s: unknown): string {
   return String(s ?? '')
